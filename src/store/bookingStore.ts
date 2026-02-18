@@ -1,0 +1,216 @@
+import { create } from "zustand";
+import type { Booking, Barber, Service } from "@/types";
+import {
+  fetchUserBookings,
+  fetchAllBookings,
+  createBooking,
+  cancelBooking,
+  confirmBookingAPI,
+  completeBookingAPI,
+  fetchBarbers,
+  fetchBarberById,
+  searchBarbers,
+  fetchBookedSlots,
+  fetchBarberDaySchedule,
+  toggleBarberAvailability,
+} from "@/lib/apiClient";
+
+interface BookingState {
+  // Barbers
+  barbers: Barber[];
+  selectedBarber: Barber | null;
+  barbersLoading: boolean;
+
+  // Booking flow - multi-service
+  selectedServices: Service[];
+  selectedDate: string | null;
+  selectedTime: string | null;
+  bookedSlots: string[];
+  customDaySlots: string[] | null; // barber's custom slots for selected date
+
+  // Bookings list
+  bookings: Booking[];
+  bookingsLoading: boolean;
+
+  // Actions - Barbers
+  loadBarbers: () => Promise<void>;
+  loadBarberById: (id: string) => Promise<void>;
+  searchBarbersList: (query: string) => Promise<void>;
+
+  // Actions - Booking flow
+  toggleService: (service: Service) => void;
+  setSelectedDate: (date: string | null) => void;
+  setSelectedTime: (time: string | null) => void;
+  loadBookedSlots: (barberId: string, date: string) => Promise<void>;
+  confirmBooking: (
+    userId: string,
+    barber: Barber,
+    services: Service[],
+    date: string,
+    time: string,
+    notes?: string,
+  ) => Promise<Booking>;
+  resetBookingFlow: () => void;
+
+  // Computed helpers
+  getTotalPrice: () => number;
+  getTotalDuration: () => number;
+
+  // Actions - Bookings list
+  loadUserBookings: (userId: string) => Promise<void>;
+  loadAllBookings: () => Promise<void>;
+  cancelUserBooking: (bookingId: string) => Promise<void>;
+
+  // Admin actions
+  confirmBookingAdmin: (bookingId: string) => Promise<void>;
+  completeBookingAdmin: (bookingId: string) => Promise<void>;
+  toggleBarberStatus: (barberId: string) => Promise<void>;
+}
+
+export const useBookingStore = create<BookingState>()((set, get) => ({
+  barbers: [],
+  selectedBarber: null,
+  barbersLoading: false,
+
+  selectedServices: [],
+  selectedDate: null,
+  selectedTime: null,
+  bookedSlots: [],
+  customDaySlots: null,
+
+  bookings: [],
+  bookingsLoading: false,
+
+  loadBarbers: async () => {
+    set({ barbersLoading: true });
+    const barbers = await fetchBarbers();
+    set({ barbers, barbersLoading: false });
+  },
+
+  loadBarberById: async (id) => {
+    set({ barbersLoading: true });
+    const barber = await fetchBarberById(id);
+    set({ selectedBarber: barber, barbersLoading: false });
+  },
+
+  searchBarbersList: async (query) => {
+    set({ barbersLoading: true });
+    const barbers = await searchBarbers(query);
+    set({ barbers, barbersLoading: false });
+  },
+
+  toggleService: (service) =>
+    set((state) => {
+      const exists = state.selectedServices.find((s) => s.id === service.id);
+      if (exists) {
+        return {
+          selectedServices: state.selectedServices.filter(
+            (s) => s.id !== service.id,
+          ),
+        };
+      }
+      return { selectedServices: [...state.selectedServices, service] };
+    }),
+
+  setSelectedDate: (date) =>
+    set({ selectedDate: date, selectedTime: null, bookedSlots: [], customDaySlots: null }),
+  setSelectedTime: (time) => set({ selectedTime: time }),
+
+  loadBookedSlots: async (barberId, date) => {
+    const [slots, daySchedule] = await Promise.all([
+      fetchBookedSlots(barberId, date),
+      fetchBarberDaySchedule(barberId, date),
+    ]);
+    set({
+      bookedSlots: slots,
+      customDaySlots: daySchedule ? daySchedule.slots : null,
+    });
+  },
+
+  getTotalPrice: () => {
+    return get().selectedServices.reduce((sum, s) => sum + s.price, 0);
+  },
+
+  getTotalDuration: () => {
+    return get().selectedServices.reduce((sum, s) => sum + s.duration, 0);
+  },
+
+  confirmBooking: async (userId, barber, services, date, time, notes) => {
+    const totalPrice = services.reduce((sum, s) => sum + s.price, 0);
+    const totalDuration = services.reduce((sum, s) => sum + s.duration, 0);
+    const booking = await createBooking({
+      userId,
+      barberId: barber.id,
+      barberName: barber.name,
+      barberAvatar: barber.avatar,
+      services,
+      date,
+      time,
+      status: "confirmed",
+      totalPrice,
+      totalDuration,
+      notes,
+    });
+    set((state) => ({ bookings: [booking, ...state.bookings] }));
+    return booking;
+  },
+
+  resetBookingFlow: () =>
+    set({
+      selectedServices: [],
+      selectedDate: null,
+      selectedTime: null,
+      bookedSlots: [],
+      customDaySlots: null,
+    }),
+
+  loadUserBookings: async (userId) => {
+    set({ bookingsLoading: true });
+    const bookings = await fetchUserBookings(userId);
+    set({ bookings, bookingsLoading: false });
+  },
+
+  loadAllBookings: async () => {
+    set({ bookingsLoading: true });
+    const bookings = await fetchAllBookings();
+    set({ bookings, bookingsLoading: false });
+  },
+
+  cancelUserBooking: async (bookingId) => {
+    await cancelBooking(bookingId);
+    set((state) => ({
+      bookings: state.bookings.map((b) =>
+        b.id === bookingId ? { ...b, status: "cancelled" as const } : b,
+      ),
+    }));
+  },
+
+  confirmBookingAdmin: async (bookingId) => {
+    await confirmBookingAPI(bookingId);
+    set((state) => ({
+      bookings: state.bookings.map((b) =>
+        b.id === bookingId ? { ...b, status: "confirmed" as const } : b,
+      ),
+    }));
+  },
+
+  completeBookingAdmin: async (bookingId) => {
+    await completeBookingAPI(bookingId);
+    set((state) => ({
+      bookings: state.bookings.map((b) =>
+        b.id === bookingId ? { ...b, status: "completed" as const } : b,
+      ),
+    }));
+  },
+
+  toggleBarberStatus: async (barberId) => {
+    const updated = await toggleBarberAvailability(barberId);
+    if (updated) {
+      set((state) => ({
+        barbers: state.barbers.map((b) =>
+          b.id === barberId ? { ...b, isAvailable: updated.isAvailable } : b,
+        ),
+      }));
+    }
+  },
+}));
