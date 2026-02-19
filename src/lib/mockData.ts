@@ -291,7 +291,7 @@ export const mockBookings: Booking[] = [
     services: [mockServices[2]],
     date: "2026-02-22",
     time: "14:00",
-    status: "pending",
+    status: "confirmed",
     totalPrice: 70000,
     totalDuration: 45,
     createdAt: "2026-02-18",

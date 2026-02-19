@@ -5,7 +5,6 @@ import {
   fetchAllBookings,
   createBooking,
   cancelBooking,
-  confirmBookingAPI,
   completeBookingAPI,
   fetchBarbers,
   fetchBarberById,
@@ -62,7 +61,6 @@ interface BookingState {
   cancelUserBooking: (bookingId: string) => Promise<void>;
 
   // Admin actions
-  confirmBookingAdmin: (bookingId: string) => Promise<void>;
   completeBookingAdmin: (bookingId: string) => Promise<void>;
   toggleBarberStatus: (barberId: string) => Promise<void>;
 }
@@ -181,15 +179,6 @@ export const useBookingStore = create<BookingState>()((set, get) => ({
     set((state) => ({
       bookings: state.bookings.map((b) =>
         b.id === bookingId ? { ...b, status: "cancelled" as const } : b,
-      ),
-    }));
-  },
-
-  confirmBookingAdmin: async (bookingId) => {
-    await confirmBookingAPI(bookingId);
-    set((state) => ({
-      bookings: state.bookings.map((b) =>
-        b.id === bookingId ? { ...b, status: "confirmed" as const } : b,
       ),
     }));
   },

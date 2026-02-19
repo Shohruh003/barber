@@ -32,7 +32,6 @@ export default function AdminDashboard() {
     bookings,
     bookingsLoading,
     loadAllBookings,
-    confirmBookingAdmin,
     completeBookingAdmin,
     cancelUserBooking,
     toggleBarberStatus,
@@ -49,7 +48,6 @@ export default function AdminDashboard() {
     .filter((b) => b.status !== "cancelled")
     .reduce((sum, b) => sum + b.totalPrice, 0);
 
-  const pendingCount = bookings.filter((b) => b.status === "pending").length;
   const confirmedCount = bookings.filter((b) => b.status === "confirmed").length;
   const completedCount = bookings.filter((b) => b.status === "completed").length;
   const cancelledCount = bookings.filter((b) => b.status === "cancelled").length;
@@ -100,11 +98,6 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleConfirm = async (bookingId: string) => {
-    await confirmBookingAdmin(bookingId);
-    toast.success(t("admin.bookingConfirmed"));
-  };
-
   const handleCancel = async (bookingId: string) => {
     await cancelUserBooking(bookingId);
     toast.success(t("admin.bookingCancelled"));
@@ -153,11 +146,8 @@ export default function AdminDashboard() {
               <CardTitle>{t("admin.allBookings")}</CardTitle>
             </CardHeader>
             <CardContent>
-              <Tabs defaultValue="pending">
+              <Tabs defaultValue="confirmed">
                 <TabsList className="mb-4 flex-wrap">
-                  <TabsTrigger value="pending">
-                    {t("admin.pending")} ({pendingCount})
-                  </TabsTrigger>
                   <TabsTrigger value="confirmed">
                     {t("admin.confirmed")} ({confirmedCount})
                   </TabsTrigger>
@@ -169,7 +159,7 @@ export default function AdminDashboard() {
                   </TabsTrigger>
                 </TabsList>
 
-                {["pending", "confirmed", "completed", "cancelled"].map(
+                {["confirmed", "completed", "cancelled"].map(
                   (tab) => (
                     <TabsContent
                       key={tab}
@@ -237,30 +227,6 @@ export default function AdminDashboard() {
 
                                 {/* Action buttons */}
                                 <div className="flex gap-2 mt-3">
-                                  {booking.status === "pending" && (
-                                    <>
-                                      <Button
-                                        size="sm"
-                                        variant="default"
-                                        onClick={() =>
-                                          handleConfirm(booking.id)
-                                        }
-                                      >
-                                        <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
-                                        {t("admin.confirmBooking")}
-                                      </Button>
-                                      <Button
-                                        size="sm"
-                                        variant="destructive"
-                                        onClick={() =>
-                                          handleCancel(booking.id)
-                                        }
-                                      >
-                                        <XCircle className="h-3.5 w-3.5 mr-1" />
-                                        {t("admin.cancelBooking")}
-                                      </Button>
-                                    </>
-                                  )}
                                   {booking.status === "confirmed" && (
                                     <>
                                       <Button
