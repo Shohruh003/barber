@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -6,22 +6,45 @@ import {
   X,
   Scissors,
   User,
-  LogOut,
+  Bell,
   CalendarDays,
   LayoutDashboard,
+  CheckCheck,
+  TrendingUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuthStore } from "@/store/authStore";
+import { useNotificationStore } from "@/store/notificationStore";
 import { cn } from "@/lib/utils";
 
 export function Navbar() {
   const { t } = useTranslation();
-  const { user, logout } = useAuthStore();
+  const { user } = useAuthStore();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const {
+    notifications,
+    loadNotifications,
+    markRead,
+    markAllRead,
+    unreadCount,
+  } = useNotificationStore();
+
+  useEffect(() => {
+    if (user && user.role === "barber") {
+      loadNotifications(user.id);
+    }
+  }, [user, loadNotifications]);
 
   const navLinks = [
     { to: "/", label: t("nav.home"), icon: null },
@@ -31,15 +54,20 @@ export function Navbar() {
   if (user) {
     if (user.role === "user") {
       navLinks.push({
-        to: "/profile",
+        to: "/bookings",
         label: t("nav.bookings"),
         icon: null,
       });
     }
     if (user.role === "barber") {
       navLinks.push({
-        to: "/profile",
+        to: "/bookings",
         label: t("nav.bookings"),
+        icon: null,
+      });
+      navLinks.push({
+        to: "/barber/dashboard",
+        label: t("nav.barberStats"),
         icon: null,
       });
       navLinks.push({
@@ -51,13 +79,20 @@ export function Navbar() {
     if (user.role === "admin") {
       navLinks.push({
         to: "/admin",
-        label: t("nav.admin"),
+        label: t("nav.adminStats"),
+        icon: null,
+      });
+      navLinks.push({
+        to: "/admin/bookings",
+        label: t("nav.adminBookings"),
         icon: null,
       });
     }
   }
 
   const isActive = (path: string) => location.pathname === path;
+
+  const unread = unreadCount();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -93,7 +128,73 @@ export function Navbar() {
           <LanguageSwitcher />
           <ThemeToggle />
           {user ? (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              {/* Notification Bell — barber only */}
+              {user.role === "barber" && (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="ghost" size="icon" className="relative">
+                      <Bell className="h-5 w-5" />
+                      {unread > 0 && (
+                        <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
+                          {unread > 9 ? "9+" : unread}
+                        </span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-96 p-0">
+                    <div className="flex items-center justify-between border-b px-4 py-3 gap-2">
+                      <h4 className="text-sm font-semibold shrink-0">
+                        {t("barberPanel.notifications")}
+                      </h4>
+                      {unread > 0 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-xs h-7 shrink-0"
+                          onClick={() => markAllRead(user.id)}
+                        >
+                          <CheckCheck className="h-3.5 w-3.5 mr-1" />
+                          {t("barberPanel.markAllRead")}
+                        </Button>
+                      )}
+                    </div>
+                    <div className="max-h-80 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <p className="text-center text-muted-foreground py-8 text-sm">
+                          {t("barberPanel.noNotifications")}
+                        </p>
+                      ) : (
+                        notifications.map((notif) => (
+                          <div
+                            key={notif.id}
+                            className={cn(
+                              "border-b last:border-b-0 px-4 py-3 cursor-pointer transition-colors hover:bg-accent",
+                              !notif.isRead && "bg-primary/5",
+                            )}
+                            onClick={() => !notif.isRead && markRead(notif.id)}
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <p className="text-sm font-medium">{notif.title}</p>
+                              {!notif.isRead && (
+                                <span className="mt-1 h-2 w-2 rounded-full bg-primary shrink-0" />
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {notif.message}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {new Date(notif.createdAt).toLocaleString()}
+                            </p>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              )}
+
+              {/* Profile Avatar */}
               <Link to="/profile" className="flex items-center gap-2">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={user.avatar} alt={user.name} />
@@ -101,9 +202,6 @@ export function Navbar() {
                 </Avatar>
                 <span className="text-sm font-medium">{user.name}</span>
               </Link>
-              <Button variant="ghost" size="icon" onClick={logout} aria-label={t("nav.logout")}>
-                <LogOut className="h-4 w-4" />
-              </Button>
             </div>
           ) : (
             <div className="flex items-center gap-2">
@@ -121,6 +219,70 @@ export function Navbar() {
         <div className="flex md:hidden items-center gap-2">
           <LanguageSwitcher />
           <ThemeToggle />
+          {/* Mobile notification bell */}
+          {user && user.role === "barber" && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon" className="relative">
+                  <Bell className="h-5 w-5" />
+                  {unread > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
+                      {unread > 9 ? "9+" : unread}
+                    </span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-80 p-0">
+                <div className="flex items-center justify-between border-b px-4 py-3">
+                  <h4 className="text-sm font-semibold">
+                    {t("barberPanel.notifications")}
+                  </h4>
+                  {unread > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs h-7"
+                      onClick={() => markAllRead(user.id)}
+                    >
+                      <CheckCheck className="h-3.5 w-3.5 mr-1" />
+                      {t("barberPanel.markAllRead")}
+                    </Button>
+                  )}
+                </div>
+                <div className="max-h-80 overflow-y-auto">
+                  {notifications.length === 0 ? (
+                    <p className="text-center text-muted-foreground py-8 text-sm">
+                      {t("barberPanel.noNotifications")}
+                    </p>
+                  ) : (
+                    notifications.map((notif) => (
+                      <div
+                        key={notif.id}
+                        className={cn(
+                          "border-b last:border-b-0 px-4 py-3 cursor-pointer transition-colors hover:bg-accent",
+                          !notif.isRead && "bg-primary/5",
+                        )}
+                        onClick={() => !notif.isRead && markRead(notif.id)}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="text-sm font-medium">{notif.title}</p>
+                          {!notif.isRead && (
+                            <span className="mt-1 h-2 w-2 rounded-full bg-primary shrink-0" />
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {notif.message}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {new Date(notif.createdAt).toLocaleString()}
+                        </p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
+          )}
           <Button
             variant="ghost"
             size="icon"
@@ -150,42 +312,31 @@ export function Navbar() {
               >
                 {link.to === "/" && <Scissors className="h-4 w-4" />}
                 {link.to === "/barbers" && <User className="h-4 w-4" />}
-                {link.to === "/profile" && <CalendarDays className="h-4 w-4" />}
+                {link.to === "/bookings" && <CalendarDays className="h-4 w-4" />}
+                {link.to === "/barber/dashboard" && <TrendingUp className="h-4 w-4" />}
                 {link.to === "/barber-panel" && <LayoutDashboard className="h-4 w-4" />}
                 {link.to === "/admin" && <LayoutDashboard className="h-4 w-4" />}
+                {link.to === "/admin/bookings" && <CalendarDays className="h-4 w-4" />}
                 {link.label}
               </Link>
             ))}
 
             <div className="border-t pt-3">
               {user ? (
-                <div className="space-y-3">
-                  <Link
-                    to="/profile"
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-3 rounded-lg px-3 py-2.5"
-                  >
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={user.avatar} alt={user.name} />
-                      <AvatarFallback>{user.name[0]}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="text-sm font-medium">{user.name}</p>
-                      <p className="text-xs text-muted-foreground">{user.email}</p>
-                    </div>
-                  </Link>
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => {
-                      logout();
-                      setMobileOpen(false);
-                    }}
-                  >
-                    <LogOut className="h-4 w-4 mr-2" />
-                    {t("nav.logout")}
-                  </Button>
-                </div>
+                <Link
+                  to="/profile"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-3 rounded-lg px-3 py-2.5"
+                >
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={user.avatar} alt={user.name} />
+                    <AvatarFallback>{user.name[0]}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="text-sm font-medium">{user.name}</p>
+                    <p className="text-xs text-muted-foreground">{user.email}</p>
+                  </div>
+                </Link>
               ) : (
                 <div className="flex gap-2">
                   <Button variant="outline" className="flex-1" asChild>

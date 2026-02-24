@@ -15,6 +15,7 @@ interface AuthState {
     email: string;
     phone: string;
     password: string;
+    role: "user" | "barber";
   }) => Promise<void>;
   logout: () => void;
   updateUser: (data: Partial<User>) => Promise<void>;

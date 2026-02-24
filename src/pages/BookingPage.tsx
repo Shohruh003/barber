@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { format, addDays, startOfDay } from "date-fns";
@@ -18,7 +18,7 @@ import { ServiceSelector } from "@/components/ServiceSelector";
 import { PageLoader } from "@/components/LoadingSpinner";
 import { useBookingStore } from "@/store/bookingStore";
 import { useAuthStore } from "@/store/authStore";
-import { generateTimeSlots, getDayName } from "@/lib/dateUtils";
+import { fetchBarberScheduledDates } from "@/lib/apiClient";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 
@@ -52,6 +52,13 @@ export default function BookingPage() {
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const [scheduledDates, setScheduledDates] = useState<string[]>([]);
+
+  // Generate next 14 days
+  const dates = useMemo(
+    () => Array.from({ length: 14 }, (_, i) => addDays(startOfDay(new Date()), i)),
+    [],
+  );
 
   useEffect(() => {
     if (barberId) {
@@ -59,6 +66,14 @@ export default function BookingPage() {
       resetBookingFlow();
     }
   }, [barberId, loadBarberById, resetBookingFlow]);
+
+  // Load which dates have barber-defined slots
+  useEffect(() => {
+    if (barberId) {
+      const dateStrs = dates.map((d) => format(d, "yyyy-MM-dd"));
+      fetchBarberScheduledDates(barberId, dateStrs).then(setScheduledDates);
+    }
+  }, [barberId, dates]);
 
   useEffect(() => {
     if (barberId && selectedDate) {
@@ -97,36 +112,20 @@ export default function BookingPage() {
   const totalPrice = getTotalPrice();
   const totalDuration = getTotalDuration();
 
-  // Generate next 14 days
-  const dates = Array.from({ length: 14 }, (_, i) =>
-    addDays(startOfDay(new Date()), i),
-  );
-
-  // Get time slots for selected date
+  // Get time slots for selected date — only barber-defined slots
   const getTimeSlots = () => {
     if (!selectedDate) return [];
 
-    // If barber has custom slots for this date, use them
-    if (customDaySlots) {
+    // Only show slots that the barber has explicitly set
+    if (customDaySlots && customDaySlots.length > 0) {
       return customDaySlots.map((time) => ({
         time,
         available: !bookedSlots.includes(time),
       }));
     }
 
-    // Otherwise, auto-generate from working hours
-    const date = new Date(selectedDate);
-    const dayName = getDayName(date);
-    const daySchedule = barber.workingHours[dayName];
-
-    if (!daySchedule.isOpen) return [];
-
-    return generateTimeSlots(
-      daySchedule.open,
-      daySchedule.close,
-      barber.slotDuration || 30,
-      bookedSlots,
-    );
+    // No custom slots = barber hasn't set schedule for this date
+    return [];
   };
 
   const timeSlots = getTimeSlots();
@@ -205,7 +204,7 @@ export default function BookingPage() {
 
           <div className="flex gap-3">
             <Button variant="outline" className="flex-1" asChild>
-              <Link to="/profile">{t("profile.myBookings")}</Link>
+              <Link to="/bookings">{t("profile.myBookings")}</Link>
             </Button>
             <Button className="flex-1" asChild>
               <Link to="/">{t("nav.home")}</Link>
@@ -289,20 +288,19 @@ export default function BookingPage() {
                 <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                   {dates.map((date) => {
                     const dateStr = format(date, "yyyy-MM-dd");
-                    const dayName = getDayName(date);
-                    const isOpen = barber.workingHours[dayName].isOpen;
+                    const hasSlots = scheduledDates.includes(dateStr);
                     const isSelected = selectedDate === dateStr;
 
                     return (
                       <button
                         key={dateStr}
-                        disabled={!isOpen}
+                        disabled={!hasSlots}
                         onClick={() => setSelectedDate(dateStr)}
                         className={cn(
                           "flex flex-col items-center min-w-[72px] rounded-lg border p-3 transition-all",
                           isSelected
                             ? "border-primary bg-primary text-primary-foreground"
-                            : isOpen
+                            : hasSlots
                               ? "border-border hover:border-primary/50"
                               : "border-border opacity-40 cursor-not-allowed",
                         )}
@@ -330,7 +328,7 @@ export default function BookingPage() {
                   </h2>
                   {timeSlots.length === 0 ? (
                     <p className="text-muted-foreground py-4">
-                      {t("booking.noSlots")}
+                      {t("barberPanel.noSlotsSet")}
                     </p>
                   ) : (
                     <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">

@@ -12,6 +12,7 @@ import {
   CalendarDays,
   ToggleLeft,
   ToggleRight,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -160,9 +161,17 @@ export default function BarberPanel() {
     setIsEditing(true);
   };
 
-  const handleRemoveSlot = (time: string) => {
-    setEditSlots(editSlots.filter((s) => s !== time));
-    setIsEditing(true);
+  const handleRemoveSlot = async (time: string) => {
+    const updated = editSlots.filter((s) => s !== time);
+    setEditSlots(updated);
+    // Auto-save immediately
+    await saveDaySchedule({
+      barberId: barber.id,
+      date: selectedDate,
+      slots: updated,
+    });
+    setIsEditing(false);
+    toast.success(t("barberPanel.slotRemoved"));
   };
 
   const handleSaveSchedule = async () => {
@@ -462,17 +471,27 @@ export default function BarberPanel() {
                                 {t("barberPanel.booked")}
                               </Badge>
                             ) : status === "blocked" ? (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 px-2 text-xs text-red-600 hover:text-red-700"
-                                onClick={() => handleToggleBlock(time)}
-                              >
-                                <Unlock className="h-3.5 w-3.5 mr-1" />
-                                {t("barberPanel.unblockSlot")}
-                              </Button>
+                              <div className="flex items-center gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 px-2 text-xs text-red-600 hover:text-red-700"
+                                  onClick={() => handleToggleBlock(time)}
+                                >
+                                  <Unlock className="h-3.5 w-3.5 mr-1" />
+                                  {t("barberPanel.unblockSlot")}
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 px-1 text-xs text-destructive hover:text-destructive"
+                                  onClick={() => handleRemoveSlot(time)}
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
+                              </div>
                             ) : (
-                              <>
+                              <div className="flex items-center gap-1">
                                 <Button
                                   variant="ghost"
                                   size="sm"
@@ -482,17 +501,15 @@ export default function BarberPanel() {
                                   <Lock className="h-3.5 w-3.5 mr-1" />
                                   {t("barberPanel.blockSlot")}
                                 </Button>
-                                {isEditing && (
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-7 px-1 text-xs text-destructive hover:text-destructive"
-                                    onClick={() => handleRemoveSlot(time)}
-                                  >
-                                    ×
-                                  </Button>
-                                )}
-                              </>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 px-1 text-xs text-destructive hover:text-destructive"
+                                  onClick={() => handleRemoveSlot(time)}
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
+                              </div>
                             )}
                           </div>
                         </div>
@@ -564,6 +581,11 @@ export default function BarberPanel() {
                         )
                         .join(", ")}
                     </p>
+                    {booking.notes && (
+                      <p className="text-xs italic text-muted-foreground border-l-2 border-primary/30 pl-2">
+                        "{booking.notes}"
+                      </p>
+                    )}
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
                       <span>{booking.totalDuration} {t("barberPanel.minutes")}</span>
                       <span className="font-semibold text-primary">

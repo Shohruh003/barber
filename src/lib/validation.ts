@@ -11,6 +11,7 @@ export const registerSchema = z.object({
   phone: z.string().min(9, "Telefon raqam noto'g'ri"),
   password: z.string().min(6, "Parol kamida 6 ta belgidan iborat bo'lishi kerak"),
   confirmPassword: z.string(),
+  role: z.enum(["user", "barber"]),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Parollar mos kelmadi",
   path: ["confirmPassword"],

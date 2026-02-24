@@ -2,6 +2,7 @@ import { create } from "zustand";
 import type { Booking, Barber, Service } from "@/types";
 import {
   fetchUserBookings,
+  fetchBarberBookings,
   fetchAllBookings,
   createBooking,
   cancelBooking,
@@ -12,6 +13,8 @@ import {
   fetchBookedSlots,
   fetchBarberDaySchedule,
   toggleBarberAvailability,
+  createNotification,
+  createReview,
 } from "@/lib/apiClient";
 
 interface BookingState {
@@ -57,8 +60,15 @@ interface BookingState {
 
   // Actions - Bookings list
   loadUserBookings: (userId: string) => Promise<void>;
+  loadBarberBookings: (barberId: string) => Promise<void>;
   loadAllBookings: () => Promise<void>;
   cancelUserBooking: (bookingId: string) => Promise<void>;
+
+  // User complete + review
+  completeBookingUser: (
+    bookingId: string,
+    review: { userId: string; userName: string; userAvatar?: string; barberId: string; rating: number; comment: string },
+  ) => Promise<void>;
 
   // Admin actions
   completeBookingAdmin: (bookingId: string) => Promise<void>;
@@ -150,6 +160,18 @@ export const useBookingStore = create<BookingState>()((set, get) => ({
       notes,
     });
     set((state) => ({ bookings: [booking, ...state.bookings] }));
+
+    // Send notification to barber
+    const serviceNames = services.map((s) => s.name).join(", ");
+    const notesText = notes ? `\nSharh: "${notes}"` : "";
+    await createNotification({
+      barberId: barber.id,
+      type: "new_booking",
+      title: `Yangi buyurtma: ${date} ${time}`,
+      message: `Mijoz ${serviceNames} xizmatiga ${date} kuni soat ${time} da yozildi. Narxi: ${totalPrice.toLocaleString()} so'm${notesText}`,
+      bookingId: booking.id,
+    });
+
     return booking;
   },
 
@@ -168,6 +190,12 @@ export const useBookingStore = create<BookingState>()((set, get) => ({
     set({ bookings, bookingsLoading: false });
   },
 
+  loadBarberBookings: async (barberId) => {
+    set({ bookingsLoading: true });
+    const bookings = await fetchBarberBookings(barberId);
+    set({ bookings, bookingsLoading: false });
+  },
+
   loadAllBookings: async () => {
     set({ bookingsLoading: true });
     const bookings = await fetchAllBookings();
@@ -175,10 +203,44 @@ export const useBookingStore = create<BookingState>()((set, get) => ({
   },
 
   cancelUserBooking: async (bookingId) => {
+    const booking = get().bookings.find((b) => b.id === bookingId);
     await cancelBooking(bookingId);
     set((state) => ({
       bookings: state.bookings.map((b) =>
         b.id === bookingId ? { ...b, status: "cancelled" as const } : b,
+      ),
+    }));
+    if (booking) {
+      const serviceNames = booking.services.map((s) => s.name).join(", ");
+      await createNotification({
+        barberId: booking.barberId,
+        type: "booking_cancelled",
+        title: `Buyurtma bekor qilindi: ${booking.date} ${booking.time}`,
+        message: `Mijoz ${serviceNames} xizmatiga ${booking.date} kuni soat ${booking.time} dagi buyurtmani bekor qildi`,
+        bookingId: booking.id,
+      });
+    }
+  },
+
+  completeBookingUser: async (bookingId, review) => {
+    const booking = get().bookings.find((b) => b.id === bookingId);
+    await completeBookingAPI(bookingId);
+    if (review.rating > 0 && review.comment.trim()) {
+      await createReview(review);
+      if (booking) {
+        const stars = "⭐".repeat(review.rating);
+        await createNotification({
+          barberId: review.barberId,
+          type: "new_booking",
+          title: `${review.userName} sizni baholadi ${stars}`,
+          message: `"${review.comment}"`,
+          bookingId,
+        });
+      }
+    }
+    set((state) => ({
+      bookings: state.bookings.map((b) =>
+        b.id === bookingId ? { ...b, status: "completed" as const } : b,
       ),
     }));
   },

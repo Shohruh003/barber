@@ -31,7 +31,7 @@ export interface Barber {
   phone: string;
   rating: number;
   reviewCount: number;
-  experience: number; // years
+  experience: string | number; // years, e.g. 5, "8+", "10+"
   location: string;
   locationUz: string;
   locationRu: string;
@@ -40,6 +40,11 @@ export interface Barber {
   gallery: string[];
   isAvailable: boolean;
   slotDuration: number; // minutes (default 30)
+  socialLinks?: {
+    instagram?: string;
+    telegram?: string;
+    facebook?: string;
+  };
 }
 
 export interface WorkingHours {
@@ -72,7 +77,7 @@ export interface Booking {
   services: Service[];
   date: string; // "2025-01-15"
   time: string; // "14:00"
-  status: "pending" | "confirmed" | "completed" | "cancelled";
+  status: "confirmed" | "completed" | "cancelled";
   totalPrice: number;
   totalDuration: number; // minutes
   createdAt: string;
@@ -102,6 +107,17 @@ export interface BlockedSlot {
   barberId: string;
   date: string;
   time: string;
+}
+
+export interface BarberNotification {
+  id: string;
+  barberId: string;
+  type: "new_booking" | "booking_cancelled";
+  title: string;
+  message: string;
+  bookingId: string;
+  isRead: boolean;
+  createdAt: string;
 }
 
 export type Language = "en" | "uz" | "ru";

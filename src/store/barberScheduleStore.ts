@@ -7,6 +7,7 @@ import {
   toggleBlockSlot,
   updateBarberSlotDuration,
   fetchBarberById,
+  updateBarberProfile as updateBarberProfileAPI,
 } from "@/lib/apiClient";
 
 interface BarberScheduleState {
@@ -22,6 +23,7 @@ interface BarberScheduleState {
   loadBlockedSlots: (barberId: string, date: string) => Promise<void>;
   toggleBlock: (barberId: string, date: string, time: string) => Promise<void>;
   updateSlotDuration: (barberId: string, duration: number) => Promise<void>;
+  updateBarberProfile: (barberId: string, data: Partial<Omit<Barber, "id" | "rating" | "reviewCount">>) => Promise<void>;
 }
 
 export const useBarberScheduleStore = create<BarberScheduleState>()(
@@ -75,6 +77,13 @@ export const useBarberScheduleStore = create<BarberScheduleState>()(
 
     updateSlotDuration: async (barberId, duration) => {
       const updated = await updateBarberSlotDuration(barberId, duration);
+      if (updated) {
+        set({ barber: updated });
+      }
+    },
+
+    updateBarberProfile: async (barberId, data) => {
+      const updated = await updateBarberProfileAPI(barberId, data);
       if (updated) {
         set({ barber: updated });
       }

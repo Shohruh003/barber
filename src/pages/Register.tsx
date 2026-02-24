@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Scissors, Eye, EyeOff } from "lucide-react";
+import { Scissors, Eye, EyeOff, User, UserCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,6 +17,7 @@ import {
 import { useAuthStore } from "@/store/authStore";
 import { registerSchema } from "@/lib/validation";
 import type { RegisterFormData } from "@/lib/validation";
+import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 
 export default function Register() {
@@ -28,10 +29,15 @@ export default function Register() {
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
+    defaultValues: { role: "user" },
   });
+
+  const selectedRole = watch("role");
 
   const onSubmit = async (data: RegisterFormData) => {
     await registerUser({
@@ -39,9 +45,14 @@ export default function Register() {
       email: data.email,
       phone: data.phone,
       password: data.password,
+      role: data.role,
     });
     toast.success(t("common.success"));
-    navigate("/", { replace: true });
+    if (data.role === "barber") {
+      navigate("/profile", { replace: true });
+    } else {
+      navigate("/", { replace: true });
+    }
   };
 
   return (
@@ -57,6 +68,49 @@ export default function Register() {
 
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {/* Role Selector */}
+            <div className="space-y-2">
+              <Label>{t("auth.role")}</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setValue("role", "user")}
+                  className={cn(
+                    "flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all",
+                    selectedRole === "user"
+                      ? "border-primary bg-primary/5"
+                      : "border-muted hover:border-muted-foreground/30",
+                  )}
+                >
+                  <User className={cn("h-8 w-8", selectedRole === "user" ? "text-primary" : "text-muted-foreground")} />
+                  <span className={cn("text-sm font-medium", selectedRole === "user" ? "text-primary" : "text-muted-foreground")}>
+                    {t("auth.roleUser")}
+                  </span>
+                  <span className="text-xs text-muted-foreground text-center">
+                    {t("auth.roleUserDesc")}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setValue("role", "barber")}
+                  className={cn(
+                    "flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all",
+                    selectedRole === "barber"
+                      ? "border-primary bg-primary/5"
+                      : "border-muted hover:border-muted-foreground/30",
+                  )}
+                >
+                  <UserCog className={cn("h-8 w-8", selectedRole === "barber" ? "text-primary" : "text-muted-foreground")} />
+                  <span className={cn("text-sm font-medium", selectedRole === "barber" ? "text-primary" : "text-muted-foreground")}>
+                    {t("auth.roleBarber")}
+                  </span>
+                  <span className="text-xs text-muted-foreground text-center">
+                    {t("auth.roleBarberDesc")}
+                  </span>
+                </button>
+              </div>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="name">{t("auth.name")}</Label>
               <Input

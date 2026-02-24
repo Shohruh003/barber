@@ -11,10 +11,13 @@ const BarbersList = lazy(() => import("@/pages/BarbersList"));
 const BarberDetail = lazy(() => import("@/pages/BarberDetail"));
 const BookingPage = lazy(() => import("@/pages/BookingPage"));
 const Profile = lazy(() => import("@/pages/Profile"));
+const Bookings = lazy(() => import("@/pages/Bookings"));
 const Login = lazy(() => import("@/pages/Login"));
 const Register = lazy(() => import("@/pages/Register"));
 const AdminDashboard = lazy(() => import("@/pages/AdminDashboard"));
+const AdminBookings = lazy(() => import("@/pages/AdminBookings"));
 const BarberPanel = lazy(() => import("@/pages/BarberPanel"));
+const BarberDashboard = lazy(() => import("@/pages/BarberDashboard"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
 function App() {
@@ -39,6 +42,14 @@ function App() {
                 }
               />
               <Route
+                path="/bookings"
+                element={
+                  <ProtectedRoute>
+                    <Bookings />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/profile"
                 element={
                   <ProtectedRoute>
@@ -55,10 +66,26 @@ function App() {
                 }
               />
               <Route
+                path="/admin/bookings"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <AdminBookings />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/barber-panel"
                 element={
                   <ProtectedRoute adminOnly>
                     <BarberPanel />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/barber/dashboard"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <BarberDashboard />
                   </ProtectedRoute>
                 }
               />

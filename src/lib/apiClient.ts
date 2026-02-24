@@ -1,4 +1,4 @@
-import type { Barber, Booking, User, BarberDaySchedule, BlockedSlot } from "@/types";
+import type { Barber, Booking, User, BarberDaySchedule, BlockedSlot, BarberNotification, Review } from "@/types";
 import {
   mockBarbers,
   mockBookings,
@@ -9,6 +9,7 @@ import {
   mockReviews,
   mockBarberDaySchedules,
   mockBlockedSlots,
+  defaultWorkingHours,
 } from "./mockData";
 
 // Simulate API delay
@@ -35,16 +36,40 @@ export async function registerAPI(data: {
   email: string;
   phone: string;
   password: string;
+  role: "user" | "barber";
 }): Promise<{ user: User; token: string }> {
   await delay(800);
+  const id = (data.role === "barber" ? "b-new-" : "u-new-") + Date.now();
   const newUser: User = {
-    id: "u-new-" + Date.now(),
+    id,
     name: data.name,
     email: data.email,
     phone: data.phone,
-    role: "user",
+    role: data.role,
     createdAt: new Date().toISOString(),
   };
+
+  if (data.role === "barber") {
+    const newBarber: Barber = {
+      id,
+      name: data.name,
+      avatar: "",
+      bio: "", bioUz: "", bioRu: "",
+      phone: data.phone,
+      rating: 0,
+      reviewCount: 0,
+      experience: 0,
+      location: "", locationUz: "", locationRu: "",
+      services: [],
+      workingHours: { ...defaultWorkingHours },
+      gallery: [],
+      isAvailable: false,
+      slotDuration: 30,
+      socialLinks: {},
+    };
+    mockBarbers.push(newBarber);
+  }
+
   return { user: newUser, token: "mock-token-new" };
 }
 
@@ -77,10 +102,17 @@ export async function searchBarbers(query: string): Promise<Barber[]> {
 
 // ---------- BOOKINGS ----------
 export async function fetchUserBookings(
-  _userId: string,
+  userId: string,
 ): Promise<Booking[]> {
   await delay(500);
-  return [...mockBookings];
+  return mockBookings.filter((b) => b.userId === userId);
+}
+
+export async function fetchBarberBookings(
+  barberId: string,
+): Promise<Booking[]> {
+  await delay(500);
+  return mockBookings.filter((b) => b.barberId === barberId);
 }
 
 export async function fetchAllBookings(): Promise<Booking[]> {
@@ -150,11 +182,20 @@ export async function fetchBookedSlots(
   await delay(300);
   const key = `${barberId}-${date}`;
   const booked = mockBookedSlots[key] || [];
+  // Include times from actual bookings (confirmed/pending)
+  const bookedFromBookings = mockBookings
+    .filter(
+      (b) =>
+        b.barberId === barberId &&
+        b.date === date &&
+        (b.status === "confirmed" || b.status === "pending"),
+    )
+    .map((b) => b.time);
   // Also include blocked slots as unavailable
   const blocked = mockBlockedSlots
     .filter((s) => s.barberId === barberId && s.date === date)
     .map((s) => s.time);
-  return [...new Set([...booked, ...blocked])];
+  return [...new Set([...booked, ...bookedFromBookings, ...blocked])];
 }
 
 // ---------- REVIEWS ----------
@@ -163,13 +204,55 @@ export async function fetchBarberReviews(barberId: string) {
   return mockReviews.filter((r) => r.barberId === barberId);
 }
 
+export async function createReview(
+  data: Omit<Review, "id" | "createdAt">,
+): Promise<Review> {
+  await delay(500);
+  const review: Review = {
+    ...data,
+    id: "rev-" + Date.now(),
+    createdAt: new Date().toISOString().split("T")[0],
+  };
+  mockReviews.push(review);
+  // Update barber rating
+  const barber = mockBarbers.find((b) => b.id === data.barberId);
+  if (barber) {
+    const allReviews = mockReviews.filter((r) => r.barberId === data.barberId);
+    barber.rating = Math.round(
+      (allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length) * 10,
+    ) / 10;
+    barber.reviewCount = allReviews.length;
+  }
+  return review;
+}
+
 // ---------- PROFILE ----------
 export async function updateProfile(
-  _userId: string,
+  userId: string,
   data: Partial<User>,
 ): Promise<User> {
   await delay(500);
+  // Also update barber name/phone/avatar if user is barber
+  const barber = mockBarbers.find((b) => b.id === userId);
+  if (barber) {
+    if (data.name) barber.name = data.name;
+    if (data.phone) barber.phone = data.phone;
+    if (data.avatar) barber.avatar = data.avatar;
+  }
   return { ...mockUser, ...data };
+}
+
+export async function updateBarberProfile(
+  barberId: string,
+  data: Partial<Omit<Barber, "id" | "rating" | "reviewCount">>,
+): Promise<Barber | null> {
+  await delay(500);
+  const barber = mockBarbers.find((b) => b.id === barberId);
+  if (barber) {
+    Object.assign(barber, data);
+    return { ...barber };
+  }
+  return null;
 }
 
 // ---------- BARBER SCHEDULE ----------
@@ -180,6 +263,18 @@ export async function fetchBarberDaySchedule(
   await delay(300);
   const key = `${barberId}-${date}`;
   return mockBarberDaySchedules[key] || null;
+}
+
+export async function fetchBarberScheduledDates(
+  barberId: string,
+  dates: string[],
+): Promise<string[]> {
+  await delay(300);
+  return dates.filter((date) => {
+    const key = `${barberId}-${date}`;
+    const schedule = mockBarberDaySchedules[key];
+    return schedule && schedule.slots.length > 0;
+  });
 }
 
 export async function saveBarberDaySchedule(
@@ -229,4 +324,47 @@ export async function updateBarberSlotDuration(
     return barber;
   }
   return null;
+}
+
+// ---------- NOTIFICATIONS ----------
+const mockNotifications: BarberNotification[] = [];
+
+export async function fetchBarberNotifications(
+  barberId: string,
+): Promise<BarberNotification[]> {
+  await delay(300);
+  return mockNotifications
+    .filter((n) => n.barberId === barberId)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+}
+
+export async function createNotification(
+  notification: Omit<BarberNotification, "id" | "createdAt" | "isRead">,
+): Promise<BarberNotification> {
+  await delay(100);
+  const newNotification: BarberNotification = {
+    ...notification,
+    id: "notif-" + Date.now(),
+    isRead: false,
+    createdAt: new Date().toISOString(),
+  };
+  mockNotifications.push(newNotification);
+  return newNotification;
+}
+
+export async function markNotificationRead(
+  notificationId: string,
+): Promise<void> {
+  await delay(200);
+  const notif = mockNotifications.find((n) => n.id === notificationId);
+  if (notif) notif.isRead = true;
+}
+
+export async function markAllNotificationsRead(
+  barberId: string,
+): Promise<void> {
+  await delay(200);
+  mockNotifications
+    .filter((n) => n.barberId === barberId)
+    .forEach((n) => (n.isRead = true));
 }

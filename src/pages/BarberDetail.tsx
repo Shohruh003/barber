@@ -8,6 +8,9 @@ import {
   Phone,
   ArrowLeft,
   Calendar,
+  Instagram,
+  Send,
+  Facebook,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -305,6 +308,45 @@ export default function BarberDetail() {
                 <MapPin className="h-4 w-4" />
                 {getLocation()}
               </div>
+
+              {/* Social Links */}
+              {barber.socialLinks && (barber.socialLinks.instagram || barber.socialLinks.telegram || barber.socialLinks.facebook) && (
+                <>
+                  <Separator />
+                  <div className="flex items-center gap-3">
+                    {barber.socialLinks.instagram && (
+                      <a
+                        href={`https://instagram.com/${barber.socialLinks.instagram}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center h-9 w-9 rounded-full bg-accent hover:bg-primary/10 transition-colors"
+                      >
+                        <Instagram className="h-4 w-4" />
+                      </a>
+                    )}
+                    {barber.socialLinks.telegram && (
+                      <a
+                        href={`https://t.me/${barber.socialLinks.telegram}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center h-9 w-9 rounded-full bg-accent hover:bg-primary/10 transition-colors"
+                      >
+                        <Send className="h-4 w-4" />
+                      </a>
+                    )}
+                    {barber.socialLinks.facebook && (
+                      <a
+                        href={`https://facebook.com/${barber.socialLinks.facebook}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center h-9 w-9 rounded-full bg-accent hover:bg-primary/10 transition-colors"
+                      >
+                        <Facebook className="h-4 w-4" />
+                      </a>
+                    )}
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
         </div>

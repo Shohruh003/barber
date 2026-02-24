@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Star, MapPin, Clock } from "lucide-react";
+import { Star, MapPin, Clock, ToggleLeft, ToggleRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,9 +9,10 @@ import type { Barber } from "@/types";
 
 interface BarberCardProps {
   barber: Barber;
+  onToggleAvailability?: (barberId: string) => void;
 }
 
-export function BarberCard({ barber }: BarberCardProps) {
+export function BarberCard({ barber, onToggleAvailability }: BarberCardProps) {
   const { t, i18n } = useTranslation();
   const lang = i18n.language as "en" | "uz" | "ru";
 
@@ -119,6 +120,22 @@ export function BarberCard({ barber }: BarberCardProps) {
               <Link to={`/barbers/${barber.id}`}>{t("barbers.about")}</Link>
             </Button>
           </div>
+
+          {onToggleAvailability && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full mt-2"
+              onClick={() => onToggleAvailability(barber.id)}
+            >
+              {barber.isAvailable ? (
+                <ToggleRight className="h-4 w-4 mr-1.5 text-green-600" />
+              ) : (
+                <ToggleLeft className="h-4 w-4 mr-1.5 text-muted-foreground" />
+              )}
+              {t("admin.toggleAvailability")}
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>

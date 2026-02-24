@@ -8,12 +8,15 @@ import { PageLoader } from "@/components/LoadingSpinner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useBookingStore } from "@/store/bookingStore";
+import { useAuthStore } from "@/store/authStore";
+import toast from "react-hot-toast";
 
 export default function BarbersList() {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
-  const { barbers, barbersLoading, loadBarbers, searchBarbersList } =
+  const { barbers, barbersLoading, loadBarbers, searchBarbersList, toggleBarberStatus } =
     useBookingStore();
+  const { user } = useAuthStore();
   const [filterAvailable, setFilterAvailable] = useState(false);
   const [sortBy, setSortBy] = useState<"rating" | "experience" | "price">(
     "rating",
@@ -108,7 +111,18 @@ export default function BarbersList() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map((barber) => (
-              <BarberCard key={barber.id} barber={barber} />
+              <BarberCard
+                key={barber.id}
+                barber={barber}
+                onToggleAvailability={
+                  user?.role === "admin"
+                    ? async (id) => {
+                        await toggleBarberStatus(id);
+                        toast.success(t("admin.barberStatusChanged"));
+                      }
+                    : undefined
+                }
+              />
             ))}
           </div>
         )}
