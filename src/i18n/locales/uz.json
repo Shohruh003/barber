@@ -29,7 +29,9 @@
     "barberPanel": "Sartarosh paneli",
     "barberStats": "Statistika",
     "adminStats": "Statistika",
-    "adminBookings": "Buyurtmalar"
+    "adminBookings": "Buyurtmalar",
+    "adminUsers": "Foydalanuvchilar",
+    "adminBarbers": "Sartaroshlar"
   },
   "home": {
     "hero": "O'zingizga mos sartaroshni tanlang",
@@ -195,7 +197,23 @@
     "weekly": "Haftalik",
     "monthly": "Oylik",
     "orderCount": "Buyurtmalar soni",
-    "revenue": "Daromad"
+    "revenue": "Daromad",
+    "users": "Foydalanuvchilar",
+    "barbers": "Sartaroshlar",
+    "searchUsers": "Foydalanuvchi qidirish...",
+    "searchBarbers": "Sartarosh qidirish...",
+    "editUser": "Tahrirlash",
+    "deleteUser": "O'chirish",
+    "deleteConfirm": "Rostdan o'chirmoqchimisiz?",
+    "userDeleted": "Foydalanuvchi o'chirildi",
+    "userUpdated": "Foydalanuvchi yangilandi",
+    "showPassword": "Parolni ko'rsatish",
+    "name": "Ism",
+    "phone": "Telefon",
+    "email": "Email",
+    "password": "Parol",
+    "actions": "Amallar",
+    "avatar": "Rasm"
   },
   "barberPanel": {
     "title": "Sartarosh paneli",

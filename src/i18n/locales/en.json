@@ -29,7 +29,9 @@
     "barberPanel": "Barber Panel",
     "barberStats": "Statistics",
     "adminStats": "Statistics",
-    "adminBookings": "Bookings"
+    "adminBookings": "Bookings",
+    "adminUsers": "Users",
+    "adminBarbers": "Barbers"
   },
   "home": {
     "hero": "Book Your Perfect Barber",
@@ -195,7 +197,23 @@
     "weekly": "Weekly",
     "monthly": "Monthly",
     "orderCount": "Order Count",
-    "revenue": "Revenue"
+    "revenue": "Revenue",
+    "users": "Users",
+    "barbers": "Barbers",
+    "searchUsers": "Search users...",
+    "searchBarbers": "Search barbers...",
+    "editUser": "Edit",
+    "deleteUser": "Delete",
+    "deleteConfirm": "Are you sure you want to delete?",
+    "userDeleted": "User deleted",
+    "userUpdated": "User updated",
+    "showPassword": "Show password",
+    "name": "Name",
+    "phone": "Phone",
+    "email": "Email",
+    "password": "Password",
+    "actions": "Actions",
+    "avatar": "Avatar"
   },
   "barberPanel": {
     "title": "Barber Panel",

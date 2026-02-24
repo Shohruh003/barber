@@ -5,6 +5,7 @@ import {
   mockUser,
   mockAdmin,
   mockBarberUser,
+  mockUsers,
   mockBookedSlots,
   mockReviews,
   mockBarberDaySchedules,
@@ -367,4 +368,46 @@ export async function markAllNotificationsRead(
   mockNotifications
     .filter((n) => n.barberId === barberId)
     .forEach((n) => (n.isRead = true));
+}
+
+// ---------- USER MANAGEMENT ----------
+export async function fetchUsersAPI(): Promise<User[]> {
+  await delay(500);
+  return mockUsers.filter((u) => u.role === "user");
+}
+
+export async function fetchBarberUsersAPI(): Promise<User[]> {
+  await delay(500);
+  return mockUsers.filter((u) => u.role === "barber");
+}
+
+export async function updateUserAPI(
+  id: string,
+  data: Partial<User>,
+): Promise<User | null> {
+  await delay(500);
+  const idx = mockUsers.findIndex((u) => u.id === id);
+  if (idx < 0) return null;
+  Object.assign(mockUsers[idx], data);
+  // Also update barber entry if user is a barber
+  const barber = mockBarbers.find((b) => b.id === id);
+  if (barber) {
+    if (data.name) barber.name = data.name;
+    if (data.phone) barber.phone = data.phone;
+    if (data.avatar) barber.avatar = data.avatar;
+  }
+  return { ...mockUsers[idx] };
+}
+
+export async function deleteUserAPI(id: string): Promise<boolean> {
+  await delay(500);
+  const idx = mockUsers.findIndex((u) => u.id === id);
+  if (idx < 0) return false;
+  mockUsers.splice(idx, 1);
+  // Also remove barber entry if exists
+  const barberIdx = mockBarbers.findIndex((b) => b.id === id);
+  if (barberIdx >= 0) {
+    mockBarbers.splice(barberIdx, 1);
+  }
+  return true;
 }

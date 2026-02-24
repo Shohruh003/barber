@@ -29,7 +29,9 @@
     "barberPanel": "Панель барбера",
     "barberStats": "Статистика",
     "adminStats": "Статистика",
-    "adminBookings": "Записи"
+    "adminBookings": "Записи",
+    "adminUsers": "Пользователи",
+    "adminBarbers": "Барберы"
   },
   "home": {
     "hero": "Найдите своего идеального барбера",
@@ -195,7 +197,23 @@
     "weekly": "Недельная",
     "monthly": "Месячная",
     "orderCount": "Кол-во записей",
-    "revenue": "Доход"
+    "revenue": "Доход",
+    "users": "Пользователи",
+    "barbers": "Барберы",
+    "searchUsers": "Поиск пользователей...",
+    "searchBarbers": "Поиск барберов...",
+    "editUser": "Редактировать",
+    "deleteUser": "Удалить",
+    "deleteConfirm": "Вы уверены, что хотите удалить?",
+    "userDeleted": "Пользователь удалён",
+    "userUpdated": "Пользователь обновлён",
+    "showPassword": "Показать пароль",
+    "name": "Имя",
+    "phone": "Телефон",
+    "email": "Email",
+    "password": "Пароль",
+    "actions": "Действия",
+    "avatar": "Фото"
   },
   "barberPanel": {
     "title": "Панель барбера",

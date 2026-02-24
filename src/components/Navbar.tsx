@@ -6,6 +6,7 @@ import {
   X,
   Scissors,
   User,
+  Users,
   Bell,
   CalendarDays,
   LayoutDashboard,
@@ -13,7 +14,6 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Popover,
@@ -85,6 +85,16 @@ export function Navbar() {
       navLinks.push({
         to: "/admin/bookings",
         label: t("nav.adminBookings"),
+        icon: null,
+      });
+      navLinks.push({
+        to: "/admin/users",
+        label: t("nav.adminUsers"),
+        icon: null,
+      });
+      navLinks.push({
+        to: "/admin/barbers",
+        label: t("nav.adminBarbers"),
         icon: null,
       });
     }
@@ -317,6 +327,8 @@ export function Navbar() {
                 {link.to === "/barber-panel" && <LayoutDashboard className="h-4 w-4" />}
                 {link.to === "/admin" && <LayoutDashboard className="h-4 w-4" />}
                 {link.to === "/admin/bookings" && <CalendarDays className="h-4 w-4" />}
+                {link.to === "/admin/users" && <Users className="h-4 w-4" />}
+                {link.to === "/admin/barbers" && <Scissors className="h-4 w-4" />}
                 {link.label}
               </Link>
             ))}

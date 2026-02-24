@@ -16,6 +16,8 @@ const Login = lazy(() => import("@/pages/Login"));
 const Register = lazy(() => import("@/pages/Register"));
 const AdminDashboard = lazy(() => import("@/pages/AdminDashboard"));
 const AdminBookings = lazy(() => import("@/pages/AdminBookings"));
+const AdminUsers = lazy(() => import("@/pages/AdminUsers"));
+const AdminBarbers = lazy(() => import("@/pages/AdminBarbers"));
 const BarberPanel = lazy(() => import("@/pages/BarberPanel"));
 const BarberDashboard = lazy(() => import("@/pages/BarberDashboard"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
@@ -70,6 +72,22 @@ function App() {
                 element={
                   <ProtectedRoute adminOnly>
                     <AdminBookings />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/users"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <AdminUsers />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/barbers"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <AdminBarbers />
                   </ProtectedRoute>
                 }
               />

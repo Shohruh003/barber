@@ -250,6 +250,7 @@ export const mockUser: User = {
   phone: "+998901112233",
   avatar: "https://randomuser.me/api/portraits/men/1.jpg",
   role: "user",
+  password: "shohruh123",
   createdAt: "2024-01-15",
 };
 
@@ -259,6 +260,7 @@ export const mockAdmin: User = {
   email: "admin@barberbook.uz",
   phone: "+998900000000",
   role: "admin",
+  password: "admin123",
   createdAt: "2024-01-01",
 };
 
@@ -269,13 +271,29 @@ export const mockBarberUser: User = {
   phone: "+998901234567",
   avatar: "https://randomuser.me/api/portraits/men/32.jpg",
   role: "barber",
+  password: "aziz123",
   createdAt: "2024-01-01",
 };
 
-export const mockUsers: User[] = [mockUser, mockAdmin, mockBarberUser,
-  { id: "u2", name: "Alisher Umarov", email: "alisher@example.com", phone: "+998901112234", role: "user", createdAt: "2024-03-10" },
-  { id: "u3", name: "Nodir Karimov", email: "nodir@example.com", phone: "+998901112235", role: "user", createdAt: "2024-05-20" },
-  { id: "u4", name: "Bekzod Tursunov", email: "bekzod@example.com", phone: "+998901112236", role: "user", createdAt: "2024-07-01" },
+export const mockUsers: User[] = [
+  mockUser,
+  mockAdmin,
+  mockBarberUser,
+  { id: "u2", name: "Alisher Umarov", email: "alisher@example.com", phone: "+998901112234", avatar: "https://randomuser.me/api/portraits/men/12.jpg", role: "user", password: "alisher123", createdAt: "2024-03-10" },
+  { id: "u3", name: "Nodir Karimov", email: "nodir@example.com", phone: "+998901112235", avatar: "https://randomuser.me/api/portraits/men/25.jpg", role: "user", password: "nodir123", createdAt: "2024-05-20" },
+  { id: "u4", name: "Bekzod Tursunov", email: "bekzod@example.com", phone: "+998901112236", avatar: "https://randomuser.me/api/portraits/men/36.jpg", role: "user", password: "bekzod123", createdAt: "2024-07-01" },
+  { id: "u5", name: "Rustam Hasanov", email: "rustam@example.com", phone: "+998901112237", avatar: "https://randomuser.me/api/portraits/men/40.jpg", role: "user", password: "rustam123", createdAt: "2024-08-15" },
+  { id: "u6", name: "Dilshod Ergashev", email: "dilshod@example.com", phone: "+998901112238", avatar: "https://randomuser.me/api/portraits/men/48.jpg", role: "user", password: "dilshod123", createdAt: "2024-09-01" },
+  { id: "u7", name: "Farrux Nazarov", email: "farrux@example.com", phone: "+998901112239", avatar: "https://randomuser.me/api/portraits/men/52.jpg", role: "user", password: "farrux123", createdAt: "2024-10-20" },
+  { id: "u8", name: "Javohir Abdullayev", email: "javohir@example.com", phone: "+998901112240", avatar: "https://randomuser.me/api/portraits/men/58.jpg", role: "user", password: "javohir123", createdAt: "2024-11-05" },
+  { id: "u9", name: "Sanjar Rahimov", email: "sanjar@example.com", phone: "+998901112241", avatar: "https://randomuser.me/api/portraits/men/63.jpg", role: "user", password: "sanjar123", createdAt: "2025-01-12" },
+  { id: "u10", name: "Eldor Qodirov", email: "eldor@example.com", phone: "+998901112242", avatar: "https://randomuser.me/api/portraits/men/70.jpg", role: "user", password: "eldor123", createdAt: "2025-03-18" },
+  // Barber users (b2-b6)
+  { id: "b2", name: "Bobur Aliyev", email: "bobur@barberbook.uz", phone: "+998901234568", avatar: "https://randomuser.me/api/portraits/men/45.jpg", role: "barber", password: "bobur123", createdAt: "2024-02-01" },
+  { id: "b3", name: "Sardor Toshmatov", email: "sardor@barberbook.uz", phone: "+998901234569", avatar: "https://randomuser.me/api/portraits/men/67.jpg", role: "barber", password: "sardor123", createdAt: "2024-03-01" },
+  { id: "b4", name: "Jasur Nematov", email: "jasur@barberbook.uz", phone: "+998901234570", avatar: "https://randomuser.me/api/portraits/men/22.jpg", role: "barber", password: "jasur123", createdAt: "2024-04-01" },
+  { id: "b5", name: "Timur Rashidov", email: "timur@barberbook.uz", phone: "+998901234571", avatar: "https://randomuser.me/api/portraits/men/55.jpg", role: "barber", password: "timur123", createdAt: "2024-05-01" },
+  { id: "b6", name: "Otabek Mirzayev", email: "otabek@barberbook.uz", phone: "+998901234572", avatar: "https://randomuser.me/api/portraits/men/78.jpg", role: "barber", password: "otabek123", createdAt: "2024-06-01" },
 ];
 
 export const mockBookings: Booking[] = [
