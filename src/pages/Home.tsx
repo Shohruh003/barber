@@ -1,10 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   Scissors,
   Calendar,
-  Star,
   ArrowRight,
   Search,
   Clock,
@@ -17,7 +16,6 @@ import { BarberCard } from "@/components/BarberCard";
 import { SearchBar } from "@/components/SearchBar";
 import { PageLoader } from "@/components/LoadingSpinner";
 import { useBookingStore } from "@/store/bookingStore";
-import { mockServices } from "@/lib/mockData";
 
 export default function Home() {
   const { t, i18n } = useTranslation();
@@ -28,6 +26,16 @@ export default function Home() {
   useEffect(() => {
     loadBarbers();
   }, [loadBarbers]);
+
+  // Derive unique popular services from all barbers
+  const popularServices = useMemo(() => {
+    const seen = new Set<string>();
+    return barbers.flatMap((b) => b.services).filter((s) => {
+      if (seen.has(s.name)) return false;
+      seen.add(s.name);
+      return true;
+    }).slice(0, 6);
+  }, [barbers]);
 
   const handleSearch = (query: string) => {
     if (query.trim()) {
@@ -99,7 +107,7 @@ export default function Home() {
             <h2 className="text-2xl font-bold">{t("home.popularServices")}</h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            {mockServices.map((service) => (
+            {popularServices.map((service) => (
               <Card
                 key={service.id}
                 className="group cursor-pointer hover:shadow-md transition-all hover:-translate-y-0.5"

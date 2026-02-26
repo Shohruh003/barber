@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -20,8 +20,8 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageLoader } from "@/components/LoadingSpinner";
 import { useBookingStore } from "@/store/bookingStore";
-import { mockReviews } from "@/lib/mockData";
-import type { WorkingHours } from "@/types";
+import { fetchBarberReviews } from "@/lib/apiClient";
+import type { Review, WorkingHours } from "@/types";
 
 export default function BarberDetail() {
   const { id } = useParams<{ id: string }>();
@@ -29,14 +29,18 @@ export default function BarberDetail() {
   const { selectedBarber, barbersLoading, loadBarberById } = useBookingStore();
   const lang = i18n.language as "en" | "uz" | "ru";
 
+  const [reviews, setReviews] = useState<Review[]>([]);
+
   useEffect(() => {
-    if (id) loadBarberById(id);
+    if (id) {
+      loadBarberById(id);
+      fetchBarberReviews(id).then(setReviews).catch(() => {});
+    }
   }, [id, loadBarberById]);
 
   if (barbersLoading || !selectedBarber) return <PageLoader />;
 
   const barber = selectedBarber;
-  const reviews = mockReviews.filter((r) => r.barberId === barber.id);
 
   const getBio = () => {
     if (lang === "uz") return barber.bioUz;

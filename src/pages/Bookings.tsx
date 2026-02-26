@@ -158,17 +158,23 @@ export default function Bookings() {
     }
   };
 
-  const BookingCard = ({ booking }: { booking: typeof bookings[0] }) => (
+  const BookingCard = ({ booking }: { booking: typeof bookings[0] }) => {
+    // Sartarosh uchun — mijoz ma'lumotlari, mijoz uchun — sartarosh ma'lumotlari
+    const isBarber = user.role === "barber";
+    const displayName = isBarber ? (booking.userName || "Mijoz") : booking.barberName;
+    const displayAvatar = isBarber ? booking.userAvatar : booking.barberAvatar;
+
+    return (
     <Card>
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
           <Avatar className="h-12 w-12">
-            <AvatarImage src={booking.barberAvatar} />
-            <AvatarFallback>{booking.barberName[0]}</AvatarFallback>
+            <AvatarImage src={displayAvatar} />
+            <AvatarFallback>{displayName[0]}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2">
-              <h4 className="font-medium truncate">{booking.barberName}</h4>
+              <h4 className="font-medium truncate">{displayName}</h4>
               <Badge variant={statusVariant(booking.status)}>
                 {t(`status.${booking.status}`)}
               </Badge>
@@ -225,7 +231,8 @@ export default function Bookings() {
         </div>
       </CardContent>
     </Card>
-  );
+    );
+  };
 
   return (
     <div className="container py-8 animate-fade-in">

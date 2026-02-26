@@ -14,6 +14,9 @@ import {
   Pencil,
   ImagePlus,
   Camera,
+  Lock,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,6 +53,8 @@ export default function Profile() {
   const { barber, loadBarber, updateBarberProfile } = useBarberScheduleStore();
   const [editMode, setEditMode] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [showOldPass, setShowOldPass] = useState(false);
+  const [showNewPass, setShowNewPass] = useState(false);
 
   const {
     register,
@@ -58,7 +63,7 @@ export default function Profile() {
     reset,
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
-    defaultValues: { name: user?.name, phone: user?.phone },
+    defaultValues: { name: user?.name, email: user?.email, phone: user?.phone, oldPassword: "", newPassword: "" },
   });
 
   useEffect(() => {
@@ -74,9 +79,23 @@ export default function Profile() {
   if (!user) return <PageLoader />;
 
   const onProfileSave = async (data: ProfileFormData) => {
-    await updateUser({ ...data, avatar: avatarUrl || undefined });
-    setEditMode(false);
-    toast.success(t("profile.profileUpdated"));
+    try {
+      const payload: Record<string, string | undefined> = {
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        avatar: avatarUrl || undefined,
+      };
+      if (data.oldPassword && data.newPassword) {
+        payload.oldPassword = data.oldPassword;
+        payload.newPassword = data.newPassword;
+      }
+      await updateUser(payload);
+      setEditMode(false);
+      toast.success(t("profile.profileUpdated"));
+    } catch {
+      toast.error(t("profile.updateError") || "Xatolik yuz berdi");
+    }
   };
 
   const roleLabel = user.role === "barber"
@@ -98,19 +117,21 @@ export default function Profile() {
               <AvatarImage src={avatarUrl || user.avatar} />
               <AvatarFallback className="text-3xl">{user.name[0]}</AvatarFallback>
             </Avatar>
-            <label className="absolute bottom-0 right-0 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-foreground shadow hover:bg-primary/90 transition-colors">
-              <Camera className="h-4 w-4" />
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) setAvatarUrl(URL.createObjectURL(file));
-                  e.target.value = "";
-                }}
-              />
-            </label>
+            {editMode && (
+              <label className="absolute bottom-0 right-0 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-foreground shadow hover:bg-primary/90 transition-colors">
+                <Camera className="h-4 w-4" />
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) setAvatarUrl(URL.createObjectURL(file));
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+            )}
           </div>
           <CardTitle className="mt-3">{user.name}</CardTitle>
           <Badge variant="outline" className="mx-auto mt-2">
@@ -131,6 +152,15 @@ export default function Profile() {
                 )}
               </div>
               <div className="space-y-2">
+                <Label>{t("profile.email")}</Label>
+                <Input type="email" {...register("email")} />
+                {errors.email && (
+                  <p className="text-sm text-destructive">
+                    {errors.email.message}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
                 <Label>{t("profile.phone")}</Label>
                 <Input {...register("phone")} />
                 {errors.phone && (
@@ -139,6 +169,34 @@ export default function Profile() {
                   </p>
                 )}
               </div>
+
+              <Separator />
+              <p className="text-sm text-muted-foreground">{t("profile.changePassword") || "Parolni o'zgartirish (ixtiyoriy)"}</p>
+
+              <div className="space-y-2">
+                <Label>{t("profile.oldPassword") || "Eski parol"}</Label>
+                <div className="relative">
+                  <Input type={showOldPass ? "text" : "password"} {...register("oldPassword")} placeholder="••••••" />
+                  <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground" onClick={() => setShowOldPass(!showOldPass)}>
+                    {showOldPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>{t("profile.newPassword") || "Yangi parol"}</Label>
+                <div className="relative">
+                  <Input type={showNewPass ? "text" : "password"} {...register("newPassword")} placeholder="••••••" />
+                  <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground" onClick={() => setShowNewPass(!showNewPass)}>
+                    {showNewPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {errors.newPassword && (
+                  <p className="text-sm text-destructive">
+                    {errors.newPassword.message}
+                  </p>
+                )}
+              </div>
+
               <div className="flex gap-2">
                 <Button type="submit" size="sm" className="flex-1">
                   <Check className="h-4 w-4 mr-1" />

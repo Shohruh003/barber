@@ -75,6 +75,8 @@ export interface Booking {
   barberId: string;
   barberName: string;
   barberAvatar: string;
+  userName: string;
+  userAvatar: string;
   services: Service[];
   date: string; // "2025-01-15"
   time: string; // "14:00"

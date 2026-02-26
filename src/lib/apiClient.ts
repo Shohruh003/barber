@@ -1,35 +1,98 @@
-import type { Barber, Booking, User, BarberDaySchedule, BlockedSlot, BarberNotification, Review } from "@/types";
-import {
-  mockBarbers,
-  mockBookings,
-  mockUser,
-  mockAdmin,
-  mockBarberUser,
-  mockUsers,
-  mockBookedSlots,
-  mockReviews,
-  mockBarberDaySchedules,
-  mockBlockedSlots,
-  defaultWorkingHours,
-} from "./mockData";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import type { Barber, Booking, User, BarberDaySchedule, BlockedSlot, BarberNotification, Review, Service } from "@/types";
 
-// Simulate API delay
-const delay = (ms: number = 500) =>
-  new Promise((resolve) => setTimeout(resolve, ms));
+const API_URL = "http://localhost:5000";
+
+function getToken(): string | null {
+  try {
+    const raw = localStorage.getItem("barber-auth");
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed?.state?.token || null;
+  } catch {
+    return null;
+  }
+}
+
+async function api<T>(path: string, options: RequestInit = {}, skipAuth = false): Promise<T> {
+  const token = skipAuth ? null : getToken();
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...(options.headers as Record<string, string>),
+  };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  const res = await fetch(`${API_URL}${path}`, { ...options, headers });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || `API Error ${res.status}`);
+  }
+  const text = await res.text();
+  return text ? (JSON.parse(text) as T) : (null as unknown as T);
+}
+
+// Transform backend barber → frontend Barber
+function transformBarber(raw: Record<string, any>): Barber {
+  return {
+    id: raw.id,
+    name: raw.user?.name || "",
+    avatar: raw.user?.avatar || "",
+    phone: raw.user?.phone || "",
+    bio: raw.bio,
+    bioUz: raw.bioUz,
+    bioRu: raw.bioRu,
+    rating: raw.rating,
+    reviewCount: raw.reviewCount,
+    experience: raw.experience,
+    location: raw.location,
+    locationUz: raw.locationUz,
+    locationRu: raw.locationRu,
+    services: raw.services || [],
+    workingHours: raw.workingHours,
+    gallery: raw.gallery || [],
+    isAvailable: raw.isAvailable,
+    slotDuration: raw.slotDuration,
+    socialLinks: {
+      instagram: raw.instagram || undefined,
+      telegram: raw.telegram || undefined,
+      facebook: raw.facebook || undefined,
+    },
+  };
+}
+
+// Transform backend BookingService → frontend Service
+function transformBookingServices(services: Record<string, any>[]): Service[] {
+  return (services || []).map((s) => ({
+    id: s.serviceId || s.id,
+    name: s.name,
+    nameUz: s.nameUz,
+    nameRu: s.nameRu,
+    description: "",
+    descriptionUz: "",
+    descriptionRu: "",
+    price: s.price,
+    duration: s.duration,
+    icon: s.icon,
+  }));
+}
+
+function transformBooking(raw: Record<string, any>): Booking {
+  return {
+    ...raw,
+    services: transformBookingServices(raw.services),
+    createdAt: raw.createdAt,
+  } as Booking;
+}
 
 // ---------- AUTH ----------
 export async function loginAPI(
   email: string,
-  _password: string,
+  password: string,
 ): Promise<{ user: User; token: string }> {
-  await delay(800);
-  if (email === "admin@barberbook.uz") {
-    return { user: mockAdmin, token: "mock-admin-token" };
-  }
-  if (email === "aziz@barberbook.uz") {
-    return { user: mockBarberUser, token: "mock-barber-token" };
-  }
-  return { user: mockUser, token: "mock-token-123" };
+  return api("/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
+  }, true);
 }
 
 export async function registerAPI(data: {
@@ -39,221 +102,137 @@ export async function registerAPI(data: {
   password: string;
   role: "user" | "barber";
 }): Promise<{ user: User; token: string }> {
-  await delay(800);
-  const id = (data.role === "barber" ? "b-new-" : "u-new-") + Date.now();
-  const newUser: User = {
-    id,
-    name: data.name,
-    email: data.email,
-    phone: data.phone,
-    role: data.role,
-    createdAt: new Date().toISOString(),
-  };
-
-  if (data.role === "barber") {
-    const newBarber: Barber = {
-      id,
-      name: data.name,
-      avatar: "",
-      bio: "", bioUz: "", bioRu: "",
-      phone: data.phone,
-      rating: 0,
-      reviewCount: 0,
-      experience: 0,
-      location: "", locationUz: "", locationRu: "",
-      services: [],
-      workingHours: { ...defaultWorkingHours },
-      gallery: [],
-      isAvailable: false,
-      slotDuration: 30,
-      socialLinks: {},
-    };
-    mockBarbers.push(newBarber);
-  }
-
-  return { user: newUser, token: "mock-token-new" };
+  return api("/auth/register", {
+    method: "POST",
+    body: JSON.stringify(data),
+  }, true);
 }
 
 // ---------- BARBERS ----------
 export async function fetchBarbers(): Promise<Barber[]> {
-  await delay(600);
-  return mockBarbers;
+  const raw = await api<Record<string, any>[]>("/barbers");
+  return raw.map(transformBarber);
 }
 
 export async function fetchBarberById(id: string): Promise<Barber | null> {
-  await delay(400);
-  return mockBarbers.find((b) => b.id === id) || null;
+  try {
+    const raw = await api<Record<string, any>>(`/barbers/${id}`);
+    return transformBarber(raw);
+  } catch {
+    return null;
+  }
 }
 
 export async function searchBarbers(query: string): Promise<Barber[]> {
-  await delay(400);
-  const q = query.toLowerCase();
-  return mockBarbers.filter(
-    (b) =>
-      b.name.toLowerCase().includes(q) ||
-      b.location.toLowerCase().includes(q) ||
-      b.locationUz.toLowerCase().includes(q) ||
-      b.services.some(
-        (s) =>
-          s.name.toLowerCase().includes(q) ||
-          s.nameUz.toLowerCase().includes(q),
-      ),
-  );
+  const raw = await api<Record<string, any>[]>(`/barbers/search?q=${encodeURIComponent(query)}`);
+  return raw.map(transformBarber);
 }
 
 // ---------- BOOKINGS ----------
-export async function fetchUserBookings(
-  userId: string,
-): Promise<Booking[]> {
-  await delay(500);
-  return mockBookings.filter((b) => b.userId === userId);
+export async function fetchUserBookings(userId: string): Promise<Booking[]> {
+  const raw = await api<Record<string, any>[]>(`/bookings/user/${userId}`);
+  return raw.map(transformBooking);
 }
 
-export async function fetchBarberBookings(
-  barberId: string,
-): Promise<Booking[]> {
-  await delay(500);
-  return mockBookings.filter((b) => b.barberId === barberId);
+export async function fetchBarberBookings(barberId: string): Promise<Booking[]> {
+  const raw = await api<Record<string, any>[]>(`/bookings/barber/${barberId}`);
+  return raw.map(transformBooking);
 }
 
 export async function fetchAllBookings(): Promise<Booking[]> {
-  await delay(500);
-  return [...mockBookings];
+  const raw = await api<Record<string, any>[]>("/bookings");
+  return raw.map(transformBooking);
 }
 
 export async function createBooking(
   data: Omit<Booking, "id" | "createdAt">,
 ): Promise<Booking> {
-  await delay(700);
-  const newBooking: Booking = {
-    ...data,
-    id: "bk-" + Date.now(),
-    createdAt: new Date().toISOString(),
-  };
-  mockBookings.push(newBooking);
-  return newBooking;
+  const raw = await api<Record<string, any>>("/bookings", {
+    method: "POST",
+    body: JSON.stringify({
+      userId: data.userId,
+      barberId: data.barberId,
+      date: data.date,
+      time: data.time,
+      totalPrice: data.totalPrice,
+      totalDuration: data.totalDuration,
+      notes: data.notes,
+      services: data.services.map((s) => ({
+        id: s.id,
+        name: s.name,
+        nameUz: s.nameUz,
+        nameRu: s.nameRu,
+        price: s.price,
+        duration: s.duration,
+        icon: s.icon,
+      })),
+    }),
+  });
+  return transformBooking(raw);
 }
 
 export async function cancelBooking(bookingId: string): Promise<boolean> {
-  await delay(500);
-  const booking = mockBookings.find((b) => b.id === bookingId);
-  if (booking) {
-    booking.status = "cancelled";
-    return true;
-  }
-  return false;
+  await api(`/bookings/${bookingId}/cancel`, { method: "PATCH" });
+  return true;
 }
 
 export async function confirmBookingAPI(bookingId: string): Promise<boolean> {
-  await delay(500);
-  const booking = mockBookings.find((b) => b.id === bookingId);
-  if (booking) {
-    booking.status = "confirmed";
-    return true;
-  }
-  return false;
+  await api(`/bookings/${bookingId}/confirm`, { method: "PATCH" });
+  return true;
 }
 
 export async function completeBookingAPI(bookingId: string): Promise<boolean> {
-  await delay(500);
-  const booking = mockBookings.find((b) => b.id === bookingId);
-  if (booking) {
-    booking.status = "completed";
-    return true;
-  }
-  return false;
+  await api(`/bookings/${bookingId}/complete`, { method: "PATCH" });
+  return true;
 }
 
 export async function toggleBarberAvailability(
   barberId: string,
 ): Promise<Barber | null> {
-  await delay(400);
-  const barber = mockBarbers.find((b) => b.id === barberId);
-  if (barber) {
-    barber.isAvailable = !barber.isAvailable;
-    return { ...barber };
-  }
-  return null;
+  const raw = await api<Record<string, any>>(`/barbers/${barberId}/toggle-availability`, { method: "PATCH" });
+  return { ...raw, name: "", avatar: "", phone: "", socialLinks: {} } as Barber;
 }
 
 export async function fetchBookedSlots(
   barberId: string,
   date: string,
 ): Promise<string[]> {
-  await delay(300);
-  const key = `${barberId}-${date}`;
-  const booked = mockBookedSlots[key] || [];
-  // Include times from actual bookings (confirmed/pending)
-  const bookedFromBookings = mockBookings
-    .filter(
-      (b) =>
-        b.barberId === barberId &&
-        b.date === date &&
-        (b.status === "confirmed" || b.status === "pending"),
-    )
-    .map((b) => b.time);
-  // Also include blocked slots as unavailable
-  const blocked = mockBlockedSlots
-    .filter((s) => s.barberId === barberId && s.date === date)
-    .map((s) => s.time);
-  return [...new Set([...booked, ...bookedFromBookings, ...blocked])];
+  return api(`/bookings/booked-slots?barberId=${barberId}&date=${date}`);
 }
 
 // ---------- REVIEWS ----------
-export async function fetchBarberReviews(barberId: string) {
-  await delay(400);
-  return mockReviews.filter((r) => r.barberId === barberId);
+export async function fetchBarberReviews(barberId: string): Promise<Review[]> {
+  return api(`/reviews/barber/${barberId}`);
 }
 
 export async function createReview(
   data: Omit<Review, "id" | "createdAt">,
 ): Promise<Review> {
-  await delay(500);
-  const review: Review = {
-    ...data,
-    id: "rev-" + Date.now(),
-    createdAt: new Date().toISOString().split("T")[0],
-  };
-  mockReviews.push(review);
-  // Update barber rating
-  const barber = mockBarbers.find((b) => b.id === data.barberId);
-  if (barber) {
-    const allReviews = mockReviews.filter((r) => r.barberId === data.barberId);
-    barber.rating = Math.round(
-      (allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length) * 10,
-    ) / 10;
-    barber.reviewCount = allReviews.length;
-  }
-  return review;
+  return api("/reviews", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
 }
 
 // ---------- PROFILE ----------
 export async function updateProfile(
   userId: string,
-  data: Partial<User>,
+  data: Partial<User> & { oldPassword?: string; newPassword?: string },
 ): Promise<User> {
-  await delay(500);
-  // Also update barber name/phone/avatar if user is barber
-  const barber = mockBarbers.find((b) => b.id === userId);
-  if (barber) {
-    if (data.name) barber.name = data.name;
-    if (data.phone) barber.phone = data.phone;
-    if (data.avatar) barber.avatar = data.avatar;
-  }
-  return { ...mockUser, ...data };
+  return api(`/users/${userId}/profile`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
 }
 
 export async function updateBarberProfile(
   barberId: string,
   data: Partial<Omit<Barber, "id" | "rating" | "reviewCount">>,
 ): Promise<Barber | null> {
-  await delay(500);
-  const barber = mockBarbers.find((b) => b.id === barberId);
-  if (barber) {
-    Object.assign(barber, data);
-    return { ...barber };
-  }
-  return null;
+  return api(`/barbers/${barberId}/profile`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
 }
 
 // ---------- BARBER SCHEDULE ----------
@@ -261,40 +240,39 @@ export async function fetchBarberDaySchedule(
   barberId: string,
   date: string,
 ): Promise<BarberDaySchedule | null> {
-  await delay(300);
-  const key = `${barberId}-${date}`;
-  return mockBarberDaySchedules[key] || null;
+  try {
+    return await api<BarberDaySchedule>(`/schedule/${barberId}/${date}`);
+  } catch {
+    return null;
+  }
 }
 
 export async function fetchBarberScheduledDates(
   barberId: string,
   dates: string[],
 ): Promise<string[]> {
-  await delay(300);
-  return dates.filter((date) => {
-    const key = `${barberId}-${date}`;
-    const schedule = mockBarberDaySchedules[key];
-    return schedule && schedule.slots.length > 0;
-  });
+  const params = dates.map((d) => `dates=${d}`).join("&");
+  return api(`/schedule/${barberId}/scheduled-dates?${params}`);
 }
 
 export async function saveBarberDaySchedule(
   schedule: BarberDaySchedule,
 ): Promise<BarberDaySchedule> {
-  await delay(500);
-  const key = `${schedule.barberId}-${schedule.date}`;
-  mockBarberDaySchedules[key] = schedule;
-  return schedule;
+  return api("/schedule", {
+    method: "PUT",
+    body: JSON.stringify({
+      barberId: schedule.barberId,
+      date: schedule.date,
+      slots: schedule.slots,
+    }),
+  });
 }
 
 export async function fetchBlockedSlots(
   barberId: string,
   date: string,
 ): Promise<BlockedSlot[]> {
-  await delay(300);
-  return mockBlockedSlots.filter(
-    (s) => s.barberId === barberId && s.date === date,
-  );
+  return api(`/schedule/${barberId}/${date}/blocked`);
 }
 
 export async function toggleBlockSlot(
@@ -302,112 +280,70 @@ export async function toggleBlockSlot(
   date: string,
   time: string,
 ): Promise<boolean> {
-  await delay(300);
-  const idx = mockBlockedSlots.findIndex(
-    (s) => s.barberId === barberId && s.date === date && s.time === time,
-  );
-  if (idx >= 0) {
-    mockBlockedSlots.splice(idx, 1);
-    return false; // unblocked
-  }
-  mockBlockedSlots.push({ barberId, date, time });
-  return true; // blocked
+  return api("/schedule/block-slot", {
+    method: "POST",
+    body: JSON.stringify({ barberId, date, time }),
+  });
 }
 
 export async function updateBarberSlotDuration(
   barberId: string,
   duration: number,
 ): Promise<Barber | null> {
-  await delay(300);
-  const barber = mockBarbers.find((b) => b.id === barberId);
-  if (barber) {
-    barber.slotDuration = duration;
-    return barber;
-  }
-  return null;
+  return api(`/barbers/${barberId}/slot-duration`, {
+    method: "PATCH",
+    body: JSON.stringify({ duration }),
+  });
 }
 
 // ---------- NOTIFICATIONS ----------
-const mockNotifications: BarberNotification[] = [];
-
 export async function fetchBarberNotifications(
   barberId: string,
 ): Promise<BarberNotification[]> {
-  await delay(300);
-  return mockNotifications
-    .filter((n) => n.barberId === barberId)
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  return api(`/notifications/barber/${barberId}`);
 }
 
 export async function createNotification(
   notification: Omit<BarberNotification, "id" | "createdAt" | "isRead">,
 ): Promise<BarberNotification> {
-  await delay(100);
-  const newNotification: BarberNotification = {
-    ...notification,
-    id: "notif-" + Date.now(),
-    isRead: false,
-    createdAt: new Date().toISOString(),
-  };
-  mockNotifications.push(newNotification);
-  return newNotification;
+  return api("/notifications", {
+    method: "POST",
+    body: JSON.stringify(notification),
+  });
 }
 
 export async function markNotificationRead(
   notificationId: string,
 ): Promise<void> {
-  await delay(200);
-  const notif = mockNotifications.find((n) => n.id === notificationId);
-  if (notif) notif.isRead = true;
+  await api(`/notifications/${notificationId}/read`, { method: "PATCH" });
 }
 
 export async function markAllNotificationsRead(
   barberId: string,
 ): Promise<void> {
-  await delay(200);
-  mockNotifications
-    .filter((n) => n.barberId === barberId)
-    .forEach((n) => (n.isRead = true));
+  await api(`/notifications/barber/${barberId}/read-all`, { method: "PATCH" });
 }
 
 // ---------- USER MANAGEMENT ----------
 export async function fetchUsersAPI(): Promise<User[]> {
-  await delay(500);
-  return mockUsers.filter((u) => u.role === "user");
+  return api("/users?role=user");
 }
 
 export async function fetchBarberUsersAPI(): Promise<User[]> {
-  await delay(500);
-  return mockUsers.filter((u) => u.role === "barber");
+  return api("/users?role=barber");
 }
 
 export async function updateUserAPI(
   id: string,
   data: Partial<User>,
 ): Promise<User | null> {
-  await delay(500);
-  const idx = mockUsers.findIndex((u) => u.id === id);
-  if (idx < 0) return null;
-  Object.assign(mockUsers[idx], data);
-  // Also update barber entry if user is a barber
-  const barber = mockBarbers.find((b) => b.id === id);
-  if (barber) {
-    if (data.name) barber.name = data.name;
-    if (data.phone) barber.phone = data.phone;
-    if (data.avatar) barber.avatar = data.avatar;
-  }
-  return { ...mockUsers[idx] };
+  return api(`/users/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
 }
 
 export async function deleteUserAPI(id: string): Promise<boolean> {
-  await delay(500);
-  const idx = mockUsers.findIndex((u) => u.id === id);
-  if (idx < 0) return false;
-  mockUsers.splice(idx, 1);
-  // Also remove barber entry if exists
-  const barberIdx = mockBarbers.findIndex((b) => b.id === id);
-  if (barberIdx >= 0) {
-    mockBarbers.splice(barberIdx, 1);
-  }
+  await api(`/users/${id}`, { method: "DELETE" });
   return true;
 }

@@ -21,7 +21,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { PageLoader } from "@/components/LoadingSpinner";
 import { useBookingStore } from "@/store/bookingStore";
-import { mockBarbers, mockUsers } from "@/lib/mockData";
+import { fetchUsersAPI, fetchBarberUsersAPI } from "@/lib/apiClient";
 import {
   ChartContainer,
   ChartTooltip,
@@ -61,6 +61,9 @@ export default function AdminDashboard() {
   const { bookings, bookingsLoading, loadAllBookings } = useBookingStore();
   const lang = i18n.language as "en" | "uz" | "ru";
 
+  const [userCount, setUserCount] = useState(0);
+  const [barberCount, setBarberCount] = useState(0);
+
   // Default: from = start of current month, to = today
   const now = new Date();
   const [dateFrom, setDateFrom] = useState<Date>(
@@ -72,6 +75,8 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     loadAllBookings();
+    fetchUsersAPI().then((users) => setUserCount(users.length)).catch(() => {});
+    fetchBarberUsersAPI().then((barbers) => setBarberCount(barbers.length)).catch(() => {});
   }, [loadAllBookings]);
 
   // --- Filter bookings by date range ---
@@ -106,14 +111,14 @@ export default function AdminDashboard() {
     },
     {
       title: t("admin.totalUsers"),
-      value: mockUsers.filter((u) => u.role === "user").length,
+      value: userCount,
       icon: <UserCheck className="h-5 w-5" />,
       color: "text-emerald-600",
       bg: "bg-emerald-100 dark:bg-emerald-900/30",
     },
     {
       title: t("admin.totalBarbers"),
-      value: mockBarbers.length,
+      value: barberCount,
       icon: <Users className="h-5 w-5" />,
       color: "text-green-600",
       bg: "bg-green-100 dark:bg-green-900/30",

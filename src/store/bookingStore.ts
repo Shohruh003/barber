@@ -161,17 +161,6 @@ export const useBookingStore = create<BookingState>()((set, get) => ({
     });
     set((state) => ({ bookings: [booking, ...state.bookings] }));
 
-    // Send notification to barber
-    const serviceNames = services.map((s) => s.name).join(", ");
-    const notesText = notes ? `\nSharh: "${notes}"` : "";
-    await createNotification({
-      barberId: barber.id,
-      type: "new_booking",
-      title: `Yangi buyurtma: ${date} ${time}`,
-      message: `Mijoz ${serviceNames} xizmatiga ${date} kuni soat ${time} da yozildi. Narxi: ${totalPrice.toLocaleString()} so'm${notesText}`,
-      bookingId: booking.id,
-    });
-
     return booking;
   },
 
@@ -203,23 +192,12 @@ export const useBookingStore = create<BookingState>()((set, get) => ({
   },
 
   cancelUserBooking: async (bookingId) => {
-    const booking = get().bookings.find((b) => b.id === bookingId);
     await cancelBooking(bookingId);
     set((state) => ({
       bookings: state.bookings.map((b) =>
         b.id === bookingId ? { ...b, status: "cancelled" as const } : b,
       ),
     }));
-    if (booking) {
-      const serviceNames = booking.services.map((s) => s.name).join(", ");
-      await createNotification({
-        barberId: booking.barberId,
-        type: "booking_cancelled",
-        title: `Buyurtma bekor qilindi: ${booking.date} ${booking.time}`,
-        message: `Mijoz ${serviceNames} xizmatiga ${booking.date} kuni soat ${booking.time} dagi buyurtmani bekor qildi`,
-        bookingId: booking.id,
-      });
-    }
   },
 
   completeBookingUser: async (bookingId, review) => {

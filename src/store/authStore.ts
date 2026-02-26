@@ -18,7 +18,7 @@ interface AuthState {
     role: "user" | "barber";
   }) => Promise<void>;
   logout: () => void;
-  updateUser: (data: Partial<User>) => Promise<void>;
+  updateUser: (data: Partial<User> & { oldPassword?: string; newPassword?: string }) => Promise<void>;
   clearError: () => void;
 }
 
@@ -35,8 +35,9 @@ export const useAuthStore = create<AuthState>()(
         try {
           const { user, token } = await loginAPI(email, password);
           set({ user, token, isLoading: false });
-        } catch {
-          set({ error: "Login xatolik yuz berdi", isLoading: false });
+        } catch (err) {
+          set({ error: "Email yoki parol noto'g'ri", isLoading: false });
+          throw err;
         }
       },
 
@@ -45,8 +46,9 @@ export const useAuthStore = create<AuthState>()(
         try {
           const { user, token } = await registerAPI(data);
           set({ user, token, isLoading: false });
-        } catch {
+        } catch (err) {
           set({ error: "Ro'yxatdan o'tishda xatolik", isLoading: false });
+          throw err;
         }
       },
 
@@ -56,13 +58,14 @@ export const useAuthStore = create<AuthState>()(
 
       updateUser: async (data) => {
         set({ isLoading: true, error: null });
+        const user = get().user;
+        if (!user) return;
         try {
-          const user = get().user;
-          if (!user) return;
           const updated = await updateProfile(user.id, data);
           set({ user: updated, isLoading: false });
-        } catch {
-          set({ error: "Profilni yangilashda xatolik", isLoading: false });
+        } catch (err) {
+          set({ isLoading: false });
+          throw err;
         }
       },
 
