@@ -4,6 +4,7 @@ import { Suspense, lazy } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { BarberLayout } from "@/components/BarberLayout";
+import { CustomerLayout } from "@/components/CustomerLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PageLoader } from "@/components/LoadingSpinner";
 import { useAuthStore } from "@/store/authStore";
@@ -33,6 +34,16 @@ const BarberSettingsScreen = lazy(() => import("@/pages/barber/BarberSettingsScr
 const BarberProfileEditScreen = lazy(() => import("@/pages/barber/BarberProfileEditScreen"));
 const BarberStatsScreen = lazy(() => import("@/pages/barber/BarberStatsScreen"));
 
+// Customer mobile pages
+const CustomerMapScreen = lazy(() => import("@/pages/customer/CustomerMapScreen"));
+const CustomerBarbersScreen = lazy(() => import("@/pages/customer/CustomerBarbersScreen"));
+const CustomerBookingsScreen = lazy(() => import("@/pages/customer/CustomerBookingsScreen"));
+const CustomerSettingsScreen = lazy(() => import("@/pages/customer/CustomerSettingsScreen"));
+const CustomerBarberDetailScreen = lazy(() => import("@/pages/customer/CustomerBarberDetailScreen"));
+const CustomerBookingPage = lazy(() => import("@/pages/customer/CustomerBookingPage"));
+const CustomerNotificationsScreen = lazy(() => import("@/pages/customer/CustomerNotificationsScreen"));
+const CustomerAIStyleScreen = lazy(() => import("@/pages/customer/CustomerAIStyleScreen"));
+
 function AppRoutes() {
   const { user } = useAuthStore();
 
@@ -54,7 +65,28 @@ function AppRoutes() {
     );
   }
 
-  // Default layout (users, admin, unauthenticated)
+  // Customer mobile layout
+  if (user?.role === "user") {
+    return (
+      <CustomerLayout>
+        <Routes>
+          <Route path="/customer/map" element={<CustomerMapScreen />} />
+          <Route path="/customer/barbers" element={<CustomerBarbersScreen />} />
+          <Route path="/customer/barber/:id" element={<CustomerBarberDetailScreen />} />
+          <Route path="/customer/booking/:barberId" element={<CustomerBookingPage />} />
+          <Route path="/customer/bookings" element={<CustomerBookingsScreen />} />
+          <Route path="/customer/settings" element={<CustomerSettingsScreen />} />
+          <Route path="/customer/notifications" element={<CustomerNotificationsScreen />} />
+          <Route path="/customer/ai-style" element={<CustomerAIStyleScreen />} />
+          <Route path="/login" element={<Navigate to="/customer/map" replace />} />
+          <Route path="/register" element={<Navigate to="/customer/map" replace />} />
+          <Route path="*" element={<Navigate to="/customer/map" replace />} />
+        </Routes>
+      </CustomerLayout>
+    );
+  }
+
+  // Default layout (admin, unauthenticated)
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />

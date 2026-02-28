@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { Barber, Booking, User, BarberDaySchedule, BlockedSlot, BarberNotification, BarberClient, Review, Service } from "@/types";
+import type { Barber, Booking, User, BarberDaySchedule, BlockedSlot, BarberNotification, UserNotification, BarberClient, Review, Service } from "@/types";
 
 const API_URL = "http://localhost:5000";
 
@@ -411,6 +411,37 @@ export async function markAllNotificationsRead(
   await api(`/notifications/barber/${barberId}/read-all`, { method: "PATCH" });
 }
 
+// ---------- FAVORITES ----------
+export async function fetchUserFavorites(): Promise<Barber[]> {
+  const raw = await api<Record<string, any>[]>("/favorites");
+  return raw.map(transformBarber);
+}
+
+export async function fetchUserFavoriteIds(): Promise<string[]> {
+  return api<string[]>("/favorites/ids");
+}
+
+export async function toggleFavoriteBarber(barberId: string): Promise<{ isFavorite: boolean }> {
+  return api<{ isFavorite: boolean }>(`/favorites/${barberId}/toggle`, { method: "POST" });
+}
+
+// ---------- USER NOTIFICATIONS ----------
+export async function fetchUserNotifications(): Promise<UserNotification[]> {
+  return api("/user-notifications");
+}
+
+export async function fetchUserUnreadCount(): Promise<number> {
+  return api("/user-notifications/unread-count");
+}
+
+export async function markUserNotificationRead(id: string): Promise<void> {
+  return api(`/user-notifications/${id}/read`, { method: "PATCH" });
+}
+
+export async function markAllUserNotificationsRead(): Promise<void> {
+  return api("/user-notifications/read-all", { method: "PATCH" });
+}
+
 // ---------- USER MANAGEMENT ----------
 export async function fetchUsersAPI(): Promise<User[]> {
   return api("/users?role=user");
@@ -433,4 +464,28 @@ export async function updateUserAPI(
 export async function deleteUserAPI(id: string): Promise<boolean> {
   await api(`/users/${id}`, { method: "DELETE" });
   return true;
+}
+
+// ---------- AI STYLE ----------
+export async function generateAiStyle(photo: File): Promise<{ generatedImage: string }> {
+  const token = getToken();
+  const formData = new FormData();
+  formData.append("photo", photo);
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 120000);
+
+  const res = await fetch(`${API_URL}/ai-style/generate`, {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+    signal: controller.signal,
+  });
+  clearTimeout(timeoutId);
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || `AI Style Error ${res.status}`);
+  }
+  return await res.json();
 }

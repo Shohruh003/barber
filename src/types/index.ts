@@ -130,6 +130,17 @@ export interface BarberNotification {
   createdAt: string;
 }
 
+export interface UserNotification {
+  id: string;
+  userId: string;
+  type: "booking_confirmed" | "booking_cancelled" | "booking_reminder" | "visit_reminder";
+  title: string;
+  message: string;
+  bookingId?: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
 export interface BarberClient {
   id: string;
   name: string;
