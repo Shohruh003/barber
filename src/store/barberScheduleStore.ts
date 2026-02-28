@@ -8,6 +8,7 @@ import {
   updateBarberSlotDuration,
   fetchBarberById,
   updateBarberProfile as updateBarberProfileAPI,
+  uploadGalleryImages,
 } from "@/lib/apiClient";
 
 interface BarberScheduleState {
@@ -24,6 +25,7 @@ interface BarberScheduleState {
   toggleBlock: (barberId: string, date: string, time: string) => Promise<void>;
   updateSlotDuration: (barberId: string, duration: number) => Promise<void>;
   updateBarberProfile: (barberId: string, data: Partial<Omit<Barber, "id" | "rating" | "reviewCount">>) => Promise<void>;
+  uploadGallery: (barberId: string, files: File[]) => Promise<void>;
 }
 
 export const useBarberScheduleStore = create<BarberScheduleState>()(
@@ -84,6 +86,13 @@ export const useBarberScheduleStore = create<BarberScheduleState>()(
 
     updateBarberProfile: async (barberId, data) => {
       const updated = await updateBarberProfileAPI(barberId, data);
+      if (updated) {
+        set({ barber: updated });
+      }
+    },
+
+    uploadGallery: async (barberId, files) => {
+      const updated = await uploadGalleryImages(barberId, files);
       if (updated) {
         set({ barber: updated });
       }

@@ -228,7 +228,7 @@ export default function BarberDetail() {
                                 {review.userName}
                               </h4>
                               <span className="text-xs text-muted-foreground">
-                                {review.createdAt}
+                                {new Date(review.createdAt).toISOString().slice(0, 10)} | {new Date(review.createdAt).toTimeString().slice(0, 5)}
                               </span>
                             </div>
                             <div className="flex items-center mt-1">

@@ -41,6 +41,10 @@ export interface Barber {
   gallery: string[];
   isAvailable: boolean;
   slotDuration: number; // minutes (default 30)
+  latitude?: number;
+  longitude?: number;
+  geoAddress?: string;
+  reminderDays?: number;
   socialLinks?: {
     instagram?: string;
     telegram?: string;
@@ -71,12 +75,15 @@ export interface TimeSlot {
 
 export interface Booking {
   id: string;
-  userId: string;
+  userId?: string;
   barberId: string;
   barberName: string;
   barberAvatar: string;
   userName: string;
   userAvatar: string;
+  guestName?: string;
+  guestPhone?: string;
+  isManual?: boolean;
   services: Service[];
   date: string; // "2025-01-15"
   time: string; // "14:00"
@@ -115,12 +122,22 @@ export interface BlockedSlot {
 export interface BarberNotification {
   id: string;
   barberId: string;
-  type: "new_booking" | "booking_cancelled";
+  type: "new_booking" | "booking_cancelled" | "manual_booking" | "reminder";
   title: string;
   message: string;
-  bookingId: string;
+  bookingId?: string;
   isRead: boolean;
   createdAt: string;
+}
+
+export interface BarberClient {
+  id: string;
+  name: string;
+  phone: string;
+  avatar?: string;
+  lastVisit: string;
+  totalVisits: number;
+  isRegistered: boolean;
 }
 
 export type Language = "en" | "uz" | "ru";

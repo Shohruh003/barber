@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { Barber, Booking, User, BarberDaySchedule, BlockedSlot, BarberNotification, Review, Service } from "@/types";
+import type { Barber, Booking, User, BarberDaySchedule, BlockedSlot, BarberNotification, BarberClient, Review, Service } from "@/types";
 
 const API_URL = "http://localhost:5000";
 
@@ -36,7 +36,7 @@ function transformBarber(raw: Record<string, any>): Barber {
   return {
     id: raw.id,
     name: raw.user?.name || "",
-    avatar: raw.user?.avatar || "",
+    avatar: getAvatarUrl(raw.user?.avatar) || "",
     phone: raw.user?.phone || "",
     bio: raw.bio,
     bioUz: raw.bioUz,
@@ -49,9 +49,13 @@ function transformBarber(raw: Record<string, any>): Barber {
     locationRu: raw.locationRu,
     services: raw.services || [],
     workingHours: raw.workingHours,
-    gallery: raw.gallery || [],
+    gallery: (raw.gallery || []).map((img: string) => getAvatarUrl(img)),
     isAvailable: raw.isAvailable,
     slotDuration: raw.slotDuration,
+    latitude: raw.latitude ?? undefined,
+    longitude: raw.longitude ?? undefined,
+    geoAddress: raw.geoAddress ?? undefined,
+    reminderDays: raw.reminderDays ?? 14,
     socialLinks: {
       instagram: raw.instagram || undefined,
       telegram: raw.telegram || undefined,
@@ -79,6 +83,7 @@ function transformBookingServices(services: Record<string, any>[]): Service[] {
 function transformBooking(raw: Record<string, any>): Booking {
   return {
     ...raw,
+    userAvatar: getAvatarUrl(raw.userAvatar),
     services: transformBookingServices(raw.services),
     createdAt: raw.createdAt,
   } as Booking;
@@ -89,10 +94,12 @@ export async function loginAPI(
   email: string,
   password: string,
 ): Promise<{ user: User; token: string }> {
-  return api("/auth/login", {
+  const result = await api<{ user: User; token: string }>("/auth/login", {
     method: "POST",
     body: JSON.stringify({ email, password }),
   }, true);
+  if (result.user?.avatar) result.user.avatar = getAvatarUrl(result.user.avatar);
+  return result;
 }
 
 export async function registerAPI(data: {
@@ -102,10 +109,12 @@ export async function registerAPI(data: {
   password: string;
   role: "user" | "barber";
 }): Promise<{ user: User; token: string }> {
-  return api("/auth/register", {
+  const result = await api<{ user: User; token: string }>("/auth/register", {
     method: "POST",
     body: JSON.stringify(data),
   }, true);
+  if (result.user?.avatar) result.user.avatar = getAvatarUrl(result.user.avatar);
+  return result;
 }
 
 // ---------- BARBERS ----------
@@ -171,6 +180,28 @@ export async function createBooking(
   return transformBooking(raw);
 }
 
+export async function createManualBooking(data: {
+  barberId: string;
+  date: string;
+  time: string;
+  guestName: string;
+  guestPhone: string;
+  services?: { id: string; name: string; nameUz: string; nameRu: string; price: number; duration: number; icon: string }[];
+  totalPrice?: number;
+  totalDuration?: number;
+  notes?: string;
+}): Promise<Booking> {
+  const raw = await api<Record<string, any>>("/bookings/manual", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+  return transformBooking(raw);
+}
+
+export async function fetchBarberClients(barberId: string): Promise<BarberClient[]> {
+  return api(`/bookings/barber/${barberId}/clients`);
+}
+
 export async function cancelBooking(bookingId: string): Promise<boolean> {
   await api(`/bookings/${bookingId}/cancel`, { method: "PATCH" });
   return true;
@@ -214,25 +245,81 @@ export async function createReview(
   });
 }
 
+// ---------- AVATAR URL ----------
+export function getAvatarUrl(avatar?: string | null): string {
+  if (!avatar) return "";
+  if (avatar.startsWith("http") || avatar.startsWith("blob:")) return avatar;
+  return `${API_URL}${avatar}`;
+}
+
 // ---------- PROFILE ----------
 export async function updateProfile(
   userId: string,
   data: Partial<User> & { oldPassword?: string; newPassword?: string },
 ): Promise<User> {
-  return api(`/users/${userId}/profile`, {
+  const user = await api<User>(`/users/${userId}/profile`, {
     method: "PATCH",
     body: JSON.stringify(data),
   });
+  if (user?.avatar) user.avatar = getAvatarUrl(user.avatar);
+  return user;
+}
+
+export async function uploadAvatar(userId: string, file: File): Promise<User> {
+  const token = getToken();
+  const formData = new FormData();
+  formData.append("avatar", file);
+
+  const res = await fetch(`${API_URL}/users/${userId}/avatar`, {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || `Upload Error ${res.status}`);
+  }
+  const user = await res.json();
+  if (user?.avatar) user.avatar = getAvatarUrl(user.avatar);
+  return user;
 }
 
 export async function updateBarberProfile(
   barberId: string,
   data: Partial<Omit<Barber, "id" | "rating" | "reviewCount">>,
 ): Promise<Barber | null> {
+  // Strip API_URL prefix from gallery URLs before sending to backend
+  const payload = { ...data };
+  if (payload.gallery) {
+    payload.gallery = payload.gallery.map((url) =>
+      url.startsWith(API_URL) ? url.replace(API_URL, "") : url,
+    );
+  }
   return api(`/barbers/${barberId}/profile`, {
     method: "PATCH",
-    body: JSON.stringify(data),
+    body: JSON.stringify(payload),
   });
+}
+
+export async function uploadGalleryImages(
+  barberId: string,
+  files: File[],
+): Promise<Barber | null> {
+  const token = getToken();
+  const formData = new FormData();
+  files.forEach((file) => formData.append("images", file));
+
+  const res = await fetch(`${API_URL}/barbers/${barberId}/gallery`, {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || `Upload Error ${res.status}`);
+  }
+  const raw = await res.json();
+  return transformBarber(raw);
 }
 
 // ---------- BARBER SCHEDULE ----------

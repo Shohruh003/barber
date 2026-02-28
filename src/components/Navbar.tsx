@@ -25,6 +25,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuthStore } from "@/store/authStore";
 import { useNotificationStore } from "@/store/notificationStore";
 import { cn } from "@/lib/utils";
+import { getAvatarUrl } from "@/lib/apiClient";
 
 export function Navbar() {
   const { t } = useTranslation();
@@ -207,7 +208,7 @@ export function Navbar() {
               {/* Profile Avatar */}
               <Link to="/profile" className="flex items-center gap-2">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={user.avatar} alt={user.name} />
+                  <AvatarImage src={getAvatarUrl(user.avatar)} alt={user.name} />
                   <AvatarFallback>{user.name[0]}</AvatarFallback>
                 </Avatar>
                 <span className="text-sm font-medium">{user.name}</span>
@@ -341,7 +342,7 @@ export function Navbar() {
                   className="flex items-center gap-3 rounded-lg px-3 py-2.5"
                 >
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={user.avatar} alt={user.name} />
+                    <AvatarImage src={getAvatarUrl(user.avatar)} alt={user.name} />
                     <AvatarFallback>{user.name[0]}</AvatarFallback>
                   </Avatar>
                   <div>

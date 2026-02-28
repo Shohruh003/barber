@@ -71,12 +71,30 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top, 0);
+  }
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }
 
 html {
   scroll-behavior: smooth;
+  overscroll-behavior: none;
 }
 
 body {
   min-height: 100dvh;
+  -webkit-overflow-scrolling: touch;
+}
+
+.bottom-nav {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }

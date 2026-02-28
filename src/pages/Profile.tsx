@@ -41,6 +41,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageLoader } from "@/components/LoadingSpinner";
 import { useAuthStore } from "@/store/authStore";
+import { getAvatarUrl } from "@/lib/apiClient";
 import { useBarberScheduleStore } from "@/store/barberScheduleStore";
 import { profileSchema } from "@/lib/validation";
 import type { ProfileFormData } from "@/lib/validation";
@@ -49,10 +50,12 @@ import toast from "react-hot-toast";
 
 export default function Profile() {
   const { t } = useTranslation();
-  const { user, updateUser, logout } = useAuthStore();
+  const { user, updateUser, uploadAvatar, logout } = useAuthStore();
   const { barber, loadBarber, updateBarberProfile } = useBarberScheduleStore();
   const [editMode, setEditMode] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState("");
   const [showOldPass, setShowOldPass] = useState(false);
   const [showNewPass, setShowNewPass] = useState(false);
 
@@ -80,11 +83,17 @@ export default function Profile() {
 
   const onProfileSave = async (data: ProfileFormData) => {
     try {
+      // Upload avatar file first if selected
+      if (avatarFile) {
+        await uploadAvatar(avatarFile);
+        setAvatarFile(null);
+        setAvatarPreview("");
+      }
+
       const payload: Record<string, string | undefined> = {
         name: data.name,
         email: data.email,
         phone: data.phone,
-        avatar: avatarUrl || undefined,
       };
       if (data.oldPassword && data.newPassword) {
         payload.oldPassword = data.oldPassword;
@@ -114,7 +123,7 @@ export default function Profile() {
         <CardHeader className="text-center">
           <div className="relative mx-auto w-fit">
             <Avatar className="h-24 w-24">
-              <AvatarImage src={avatarUrl || user.avatar} />
+              <AvatarImage src={avatarPreview || getAvatarUrl(avatarUrl) || getAvatarUrl(user.avatar)} />
               <AvatarFallback className="text-3xl">{user.name[0]}</AvatarFallback>
             </Avatar>
             {editMode && (
@@ -126,7 +135,10 @@ export default function Profile() {
                   className="hidden"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
-                    if (file) setAvatarUrl(URL.createObjectURL(file));
+                    if (file) {
+                      setAvatarFile(file);
+                      setAvatarPreview(URL.createObjectURL(file));
+                    }
                     e.target.value = "";
                   }}
                 />
@@ -209,6 +221,8 @@ export default function Profile() {
                   onClick={() => {
                     setEditMode(false);
                     reset();
+                    setAvatarFile(null);
+                    setAvatarPreview("");
                     setAvatarUrl(user.avatar || "");
                   }}
                 >

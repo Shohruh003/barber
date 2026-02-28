@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { User } from "@/types";
-import { loginAPI, registerAPI, updateProfile } from "@/lib/apiClient";
+import { loginAPI, registerAPI, updateProfile, uploadAvatar } from "@/lib/apiClient";
 
 interface AuthState {
   user: User | null;
@@ -19,6 +19,7 @@ interface AuthState {
   }) => Promise<void>;
   logout: () => void;
   updateUser: (data: Partial<User> & { oldPassword?: string; newPassword?: string }) => Promise<void>;
+  uploadAvatar: (file: File) => Promise<void>;
   clearError: () => void;
 }
 
@@ -65,6 +66,17 @@ export const useAuthStore = create<AuthState>()(
           set({ user: updated, isLoading: false });
         } catch (err) {
           set({ isLoading: false });
+          throw err;
+        }
+      },
+
+      uploadAvatar: async (file: File) => {
+        const user = get().user;
+        if (!user) return;
+        try {
+          const updated = await uploadAvatar(user.id, file);
+          set({ user: updated });
+        } catch (err) {
           throw err;
         }
       },
