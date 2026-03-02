@@ -32,11 +32,11 @@ export default function Login() {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      await login(data.email, data.password);
+      await login(data.phone, data.password);
       toast.success(t("common.success"));
       navigate(from, { replace: true });
     } catch {
-      toast.error("Email yoki parol noto'g'ri");
+      toast.error("Telefon raqam yoki parol noto'g'ri");
     }
   };
 
@@ -52,36 +52,19 @@ export default function Login() {
         </CardHeader>
 
         <CardContent className="space-y-4">
-          <div className="rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground space-y-1.5">
-            <p className="font-medium text-center text-foreground">Demo login:</p>
-            <div className="grid grid-cols-1 gap-1 text-xs">
-              <div className="flex justify-between">
-                <span>👤 User:</span>
-                <span className="font-mono">shohruh@example.com / shohruh123</span>
-              </div>
-              <div className="flex justify-between">
-                <span>💈 Barber:</span>
-                <span className="font-mono">aziz@barberbook.uz / aziz123</span>
-              </div>
-              <div className="flex justify-between">
-                <span>🔑 Admin:</span>
-                <span className="font-mono">admin@barberbook.uz / admin123</span>
-              </div>
-            </div>
-          </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">{t("auth.email")}</Label>
+              <Label htmlFor="phone">{t("auth.phone")}</Label>
               <Input
-                id="email"
-                type="email"
-                placeholder="email@example.com"
-                {...register("email")}
-                aria-invalid={!!errors.email}
+                id="phone"
+                type="tel"
+                placeholder="+998 90 123 45 67"
+                {...register("phone")}
+                aria-invalid={!!errors.phone}
               />
-              {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
+              {errors.phone && (
+                <p className="text-sm text-destructive">{errors.phone.message}</p>
               )}
             </div>
 

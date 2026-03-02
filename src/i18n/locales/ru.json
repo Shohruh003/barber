@@ -220,6 +220,8 @@
     "phone": "Телефон",
     "email": "Email",
     "password": "Пароль",
+    "newPassword": "Новый пароль",
+    "newPasswordHint": "Оставьте пустым, чтобы не менять",
     "actions": "Действия",
     "avatar": "Фото"
   },

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   Menu,
@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   CheckCheck,
   TrendingUp,
+  LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -29,8 +30,9 @@ import { getAvatarUrl } from "@/lib/apiClient";
 
 export function Navbar() {
   const { t } = useTranslation();
-  const { user } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const location = useLocation();
+  const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const {
@@ -47,10 +49,7 @@ export function Navbar() {
     }
   }, [user, loadNotifications]);
 
-  const navLinks = [
-    { to: "/", label: t("nav.home"), icon: null },
-    { to: "/barbers", label: t("nav.barbers"), icon: null },
-  ];
+  const navLinks: { to: string; label: string; icon: null }[] = [];
 
   if (user) {
     if (user.role === "user") {
@@ -206,13 +205,21 @@ export function Navbar() {
               )}
 
               {/* Profile Avatar */}
-              <Link to="/profile" className="flex items-center gap-2">
+              <div className="flex items-center gap-2">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={getAvatarUrl(user.avatar)} alt={user.name} />
                   <AvatarFallback>{user.name[0]}</AvatarFallback>
                 </Avatar>
                 <span className="text-sm font-medium">{user.name}</span>
-              </Link>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => { logout(); navigate("/login"); }}
+                title={t("nav.logout")}
+              >
+                <LogOut className="h-5 w-5" />
+              </Button>
             </div>
           ) : (
             <div className="flex items-center gap-2">
@@ -336,20 +343,26 @@ export function Navbar() {
 
             <div className="border-t pt-3">
               {user ? (
-                <Link
-                  to="/profile"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-3 rounded-lg px-3 py-2.5"
-                >
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={getAvatarUrl(user.avatar)} alt={user.name} />
-                    <AvatarFallback>{user.name[0]}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="text-sm font-medium">{user.name}</p>
-                    <p className="text-xs text-muted-foreground">{user.email}</p>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3 rounded-lg px-3 py-2.5">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={getAvatarUrl(user.avatar)} alt={user.name} />
+                      <AvatarFallback>{user.name[0]}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="text-sm font-medium">{user.name}</p>
+                      <p className="text-xs text-muted-foreground">{user.email}</p>
+                    </div>
                   </div>
-                </Link>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => { logout(); navigate("/login"); setMobileOpen(false); }}
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    {t("nav.logout")}
+                  </Button>
+                </div>
               ) : (
                 <div className="flex gap-2">
                   <Button variant="outline" className="flex-1" asChild>

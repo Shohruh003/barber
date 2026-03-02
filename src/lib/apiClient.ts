@@ -91,12 +91,12 @@ function transformBooking(raw: Record<string, any>): Booking {
 
 // ---------- AUTH ----------
 export async function loginAPI(
-  email: string,
+  phone: string,
   password: string,
 ): Promise<{ user: User; token: string }> {
   const result = await api<{ user: User; token: string }>("/auth/login", {
     method: "POST",
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ phone, password }),
   }, true);
   if (result.user?.avatar) result.user.avatar = getAvatarUrl(result.user.avatar);
   return result;
@@ -104,7 +104,6 @@ export async function loginAPI(
 
 export async function registerAPI(data: {
   name: string;
-  email: string;
   phone: string;
   password: string;
   role: "user" | "barber";
@@ -444,11 +443,13 @@ export async function markAllUserNotificationsRead(): Promise<void> {
 
 // ---------- USER MANAGEMENT ----------
 export async function fetchUsersAPI(): Promise<User[]> {
-  return api("/users?role=user");
+  const users = await api<User[]>("/users?role=user");
+  return users.map((u) => ({ ...u, avatar: getAvatarUrl(u.avatar) }));
 }
 
 export async function fetchBarberUsersAPI(): Promise<User[]> {
-  return api("/users?role=barber");
+  const users = await api<User[]>("/users?role=barber");
+  return users.map((u) => ({ ...u, avatar: getAvatarUrl(u.avatar) }));
 }
 
 export async function updateUserAPI(

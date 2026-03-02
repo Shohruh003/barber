@@ -34,9 +34,6 @@ export default function AdminBarbers() {
   const [barbers, setBarbers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>(
-    {},
-  );
 
   // Edit dialog
   const [editUser, setEditUser] = useState<User | null>(null);
@@ -44,8 +41,9 @@ export default function AdminBarbers() {
     name: "",
     email: "",
     phone: "",
-    password: "",
+    newPassword: "",
   });
+  const [showNewPassword, setShowNewPassword] = useState(false);
 
   // Delete dialog
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
@@ -76,18 +74,21 @@ export default function AdminBarbers() {
       name: user.name,
       email: user.email,
       phone: user.phone,
-      password: user.password || "",
+      newPassword: "",
     });
   }
 
   async function handleSaveEdit() {
     if (!editUser) return;
-    const updated = await updateUserAPI(editUser.id, {
+    const payload: Record<string, string> = {
       name: editForm.name,
       email: editForm.email,
       phone: editForm.phone,
-      password: editForm.password,
-    });
+    };
+    if (editForm.newPassword) {
+      payload.password = editForm.newPassword;
+    }
+    const updated = await updateUserAPI(editUser.id, payload);
     if (updated) {
       setBarbers((prev) =>
         prev.map((u) => (u.id === editUser.id ? { ...u, ...updated } : u)),
@@ -105,10 +106,6 @@ export default function AdminBarbers() {
       toast.success(t("admin.userDeleted"));
     }
     setDeleteTarget(null);
-  }
-
-  function togglePassword(id: string) {
-    setShowPasswords((prev) => ({ ...prev, [id]: !prev[id] }));
   }
 
   if (loading) return <PageLoader />;
@@ -136,7 +133,6 @@ export default function AdminBarbers() {
               <TableHead>{t("admin.name")}</TableHead>
               <TableHead>{t("admin.phone")}</TableHead>
               <TableHead>{t("admin.email")}</TableHead>
-              <TableHead>{t("admin.password")}</TableHead>
               <TableHead className="text-right">{t("admin.actions")}</TableHead>
             </TableRow>
           </TableHeader>
@@ -144,7 +140,7 @@ export default function AdminBarbers() {
             {filtered.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={6}
+                  colSpan={5}
                   className="text-center py-8 text-muted-foreground"
                 >
                   {t("common.noResults")}
@@ -162,27 +158,6 @@ export default function AdminBarbers() {
                   <TableCell className="font-medium">{barber.name}</TableCell>
                   <TableCell>{barber.phone}</TableCell>
                   <TableCell>{barber.email}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <span className="font-mono text-sm">
-                        {showPasswords[barber.id]
-                          ? barber.password
-                          : "••••••••"}
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7"
-                        onClick={() => togglePassword(barber.id)}
-                      >
-                        {showPasswords[barber.id] ? (
-                          <EyeOff className="h-3.5 w-3.5" />
-                        ) : (
-                          <Eye className="h-3.5 w-3.5" />
-                        )}
-                      </Button>
-                    </div>
-                  </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
                       <Button
@@ -248,13 +223,27 @@ export default function AdminBarbers() {
               />
             </div>
             <div className="grid gap-2">
-              <Label>{t("admin.password")}</Label>
-              <Input
-                value={editForm.password}
-                onChange={(e) =>
-                  setEditForm((f) => ({ ...f, password: e.target.value }))
-                }
-              />
+              <Label>{t("admin.newPassword")}</Label>
+              <div className="relative">
+                <Input
+                  type={showNewPassword ? "text" : "password"}
+                  placeholder={t("admin.newPasswordHint")}
+                  value={editForm.newPassword}
+                  onChange={(e) =>
+                    setEditForm((f) => ({ ...f, newPassword: e.target.value }))
+                  }
+                  className="pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-0 top-0 h-full w-10"
+                  onClick={() => setShowNewPassword((v) => !v)}
+                >
+                  {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
             </div>
           </div>
           <DialogFooter>

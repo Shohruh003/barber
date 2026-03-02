@@ -9,10 +9,9 @@ interface AuthState {
   isLoading: boolean;
   error: string | null;
 
-  login: (email: string, password: string) => Promise<void>;
+  login: (phone: string, password: string) => Promise<void>;
   register: (data: {
     name: string;
-    email: string;
     phone: string;
     password: string;
     role: "user" | "barber";
@@ -31,13 +30,13 @@ export const useAuthStore = create<AuthState>()(
       isLoading: false,
       error: null,
 
-      login: async (email, password) => {
+      login: async (phone, password) => {
         set({ isLoading: true, error: null });
         try {
-          const { user, token } = await loginAPI(email, password);
+          const { user, token } = await loginAPI(phone, password);
           set({ user, token, isLoading: false });
         } catch (err) {
-          set({ error: "Email yoki parol noto'g'ri", isLoading: false });
+          set({ error: "Telefon raqam yoki parol noto'g'ri", isLoading: false });
           throw err;
         }
       },

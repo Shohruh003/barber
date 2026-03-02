@@ -151,6 +151,8 @@ export const useBookingStore = create<BookingState>()((set, get) => ({
       barberId: barber.id,
       barberName: barber.name,
       barberAvatar: barber.avatar,
+      userName: "",
+      userAvatar: "",
       services,
       date,
       time,

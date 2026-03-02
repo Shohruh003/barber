@@ -42,7 +42,6 @@ export default function Register() {
   const onSubmit = async (data: RegisterFormData) => {
     await registerUser({
       name: data.name,
-      email: data.email,
       phone: data.phone,
       password: data.password,
       role: data.role,
@@ -121,20 +120,6 @@ export default function Register() {
               />
               {errors.name && (
                 <p className="text-sm text-destructive">{errors.name.message}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email">{t("auth.email")}</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="email@example.com"
-                {...register("email")}
-                aria-invalid={!!errors.email}
-              />
-              {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
               )}
             </div>
 

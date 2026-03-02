@@ -220,6 +220,8 @@
     "phone": "Phone",
     "email": "Email",
     "password": "Password",
+    "newPassword": "New password",
+    "newPasswordHint": "Leave empty to keep current",
     "actions": "Actions",
     "avatar": "Avatar"
   },

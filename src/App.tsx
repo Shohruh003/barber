@@ -1,24 +1,17 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { Suspense, lazy } from "react";
+import { Scissors } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
 import { BarberLayout } from "@/components/BarberLayout";
 import { CustomerLayout } from "@/components/CustomerLayout";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { PageLoader } from "@/components/LoadingSpinner";
 import { useAuthStore } from "@/store/authStore";
 
-// Public / User pages
-const Home = lazy(() => import("@/pages/Home"));
-const BarbersList = lazy(() => import("@/pages/BarbersList"));
-const BarberDetail = lazy(() => import("@/pages/BarberDetail"));
-const BookingPage = lazy(() => import("@/pages/BookingPage"));
-const Profile = lazy(() => import("@/pages/Profile"));
-const Bookings = lazy(() => import("@/pages/Bookings"));
 const Login = lazy(() => import("@/pages/Login"));
 const Register = lazy(() => import("@/pages/Register"));
-const NotFound = lazy(() => import("@/pages/NotFound"));
 
 // Admin pages
 const AdminDashboard = lazy(() => import("@/pages/AdminDashboard"));
@@ -44,6 +37,25 @@ const CustomerBookingPage = lazy(() => import("@/pages/customer/CustomerBookingP
 const CustomerNotificationsScreen = lazy(() => import("@/pages/customer/CustomerNotificationsScreen"));
 const CustomerAIStyleScreen = lazy(() => import("@/pages/customer/CustomerAIStyleScreen"));
 
+function AuthHeader() {
+  return (
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur safe-area-top">
+      <div className="container flex h-14 items-center justify-between">
+        <div className="flex items-center gap-2 font-bold text-xl">
+          <Scissors className="h-6 w-6 text-primary" />
+          <span className="bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
+            BarberBook
+          </span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LanguageSwitcher />
+          <ThemeToggle />
+        </div>
+      </div>
+    </header>
+  );
+}
+
 function AppRoutes() {
   const { user } = useAuthStore();
 
@@ -58,7 +70,6 @@ function AppRoutes() {
           <Route path="/barber/settings" element={<BarberSettingsScreen />} />
           <Route path="/barber/profile-edit" element={<BarberProfileEditScreen />} />
           <Route path="/barber/stats" element={<BarberStatsScreen />} />
-          <Route path="/login" element={<Navigate to="/barber/schedule" replace />} />
           <Route path="*" element={<Navigate to="/barber/schedule" replace />} />
         </Routes>
       </BarberLayout>
@@ -78,59 +89,45 @@ function AppRoutes() {
           <Route path="/customer/settings" element={<CustomerSettingsScreen />} />
           <Route path="/customer/notifications" element={<CustomerNotificationsScreen />} />
           <Route path="/customer/ai-style" element={<CustomerAIStyleScreen />} />
-          <Route path="/login" element={<Navigate to="/customer/map" replace />} />
-          <Route path="/register" element={<Navigate to="/customer/map" replace />} />
           <Route path="*" element={<Navigate to="/customer/map" replace />} />
         </Routes>
       </CustomerLayout>
     );
   }
 
-  // Default layout (admin, unauthenticated)
+  // Admin layout
+  if (user?.role === "admin") {
+    return (
+      <div className="flex min-h-screen flex-col">
+        <Navbar />
+        <main className="flex-1">
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/bookings" element={<AdminBookings />} />
+              <Route path="/admin/users" element={<AdminUsers />} />
+              <Route path="/admin/barbers" element={<AdminBarbers />} />
+              <Route path="*" element={<Navigate to="/admin" replace />} />
+            </Routes>
+          </Suspense>
+        </main>
+      </div>
+    );
+  }
+
+  // Unauthenticated — login/register
   return (
     <div className="flex min-h-screen flex-col">
-      <Navbar />
+      <AuthHeader />
       <main className="flex-1">
         <Suspense fallback={<PageLoader />}>
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/barbers" element={<BarbersList />} />
-            <Route path="/barbers/:id" element={<BarberDetail />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route
-              path="/booking/:barberId"
-              element={<ProtectedRoute><BookingPage /></ProtectedRoute>}
-            />
-            <Route
-              path="/bookings"
-              element={<ProtectedRoute><Bookings /></ProtectedRoute>}
-            />
-            <Route
-              path="/profile"
-              element={<ProtectedRoute><Profile /></ProtectedRoute>}
-            />
-            <Route
-              path="/admin"
-              element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>}
-            />
-            <Route
-              path="/admin/bookings"
-              element={<ProtectedRoute adminOnly><AdminBookings /></ProtectedRoute>}
-            />
-            <Route
-              path="/admin/users"
-              element={<ProtectedRoute adminOnly><AdminUsers /></ProtectedRoute>}
-            />
-            <Route
-              path="/admin/barbers"
-              element={<ProtectedRoute adminOnly><AdminBarbers /></ProtectedRoute>}
-            />
-            <Route path="*" element={<NotFound />} />
+            <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </Suspense>
       </main>
-      <Footer />
     </div>
   );
 }

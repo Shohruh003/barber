@@ -46,7 +46,7 @@ export default function BarbersList() {
 
   filtered.sort((a, b) => {
     if (sortBy === "rating") return b.rating - a.rating;
-    if (sortBy === "experience") return b.experience - a.experience;
+    if (sortBy === "experience") return Number(b.experience) - Number(a.experience);
     return (
       Math.min(...a.services.map((s) => s.price)) -
       Math.min(...b.services.map((s) => s.price))

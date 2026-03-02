@@ -220,6 +220,8 @@
     "phone": "Telefon",
     "email": "Email",
     "password": "Parol",
+    "newPassword": "Yangi parol",
+    "newPasswordHint": "Bo'sh qoldirilsa o'zgarmaydi",
     "actions": "Amallar",
     "avatar": "Rasm"
   },

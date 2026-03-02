@@ -30,11 +30,11 @@ export default function AdminUsers() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({});
 
   // Edit dialog
   const [editUser, setEditUser] = useState<User | null>(null);
-  const [editForm, setEditForm] = useState({ name: "", email: "", phone: "", password: "" });
+  const [editForm, setEditForm] = useState({ name: "", email: "", phone: "", newPassword: "" });
+  const [showNewPassword, setShowNewPassword] = useState(false);
 
   // Delete dialog
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
@@ -65,18 +65,21 @@ export default function AdminUsers() {
       name: user.name,
       email: user.email,
       phone: user.phone,
-      password: user.password || "",
+      newPassword: "",
     });
   }
 
   async function handleSaveEdit() {
     if (!editUser) return;
-    const updated = await updateUserAPI(editUser.id, {
+    const payload: Record<string, string> = {
       name: editForm.name,
       email: editForm.email,
       phone: editForm.phone,
-      password: editForm.password,
-    });
+    };
+    if (editForm.newPassword) {
+      payload.password = editForm.newPassword;
+    }
+    const updated = await updateUserAPI(editUser.id, payload);
     if (updated) {
       setUsers((prev) => prev.map((u) => (u.id === editUser.id ? { ...u, ...updated } : u)));
       toast.success(t("admin.userUpdated"));
@@ -92,10 +95,6 @@ export default function AdminUsers() {
       toast.success(t("admin.userDeleted"));
     }
     setDeleteTarget(null);
-  }
-
-  function togglePassword(id: string) {
-    setShowPasswords((prev) => ({ ...prev, [id]: !prev[id] }));
   }
 
   if (loading) return <PageLoader />;
@@ -123,14 +122,13 @@ export default function AdminUsers() {
               <TableHead>{t("admin.name")}</TableHead>
               <TableHead>{t("admin.phone")}</TableHead>
               <TableHead>{t("admin.email")}</TableHead>
-              <TableHead>{t("admin.password")}</TableHead>
               <TableHead className="text-right">{t("admin.actions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                   {t("common.noResults")}
                 </TableCell>
               </TableRow>
@@ -146,25 +144,6 @@ export default function AdminUsers() {
                   <TableCell className="font-medium">{user.name}</TableCell>
                   <TableCell>{user.phone}</TableCell>
                   <TableCell>{user.email}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <span className="font-mono text-sm">
-                        {showPasswords[user.id] ? user.password : "••••••••"}
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7"
-                        onClick={() => togglePassword(user.id)}
-                      >
-                        {showPasswords[user.id] ? (
-                          <EyeOff className="h-3.5 w-3.5" />
-                        ) : (
-                          <Eye className="h-3.5 w-3.5" />
-                        )}
-                      </Button>
-                    </div>
-                  </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
                       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(user)}>
@@ -202,8 +181,25 @@ export default function AdminUsers() {
               <Input value={editForm.phone} onChange={(e) => setEditForm((f) => ({ ...f, phone: e.target.value }))} />
             </div>
             <div className="grid gap-2">
-              <Label>{t("admin.password")}</Label>
-              <Input value={editForm.password} onChange={(e) => setEditForm((f) => ({ ...f, password: e.target.value }))} />
+              <Label>{t("admin.newPassword")}</Label>
+              <div className="relative">
+                <Input
+                  type={showNewPassword ? "text" : "password"}
+                  placeholder={t("admin.newPasswordHint")}
+                  value={editForm.newPassword}
+                  onChange={(e) => setEditForm((f) => ({ ...f, newPassword: e.target.value }))}
+                  className="pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-0 top-0 h-full w-10"
+                  onClick={() => setShowNewPassword((v) => !v)}
+                >
+                  {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
             </div>
           </div>
           <DialogFooter>

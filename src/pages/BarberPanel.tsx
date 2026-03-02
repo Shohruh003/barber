@@ -559,8 +559,8 @@ export default function BarberPanel() {
                         variant={
                           booking.status === "confirmed"
                             ? "success"
-                            : booking.status === "pending"
-                              ? "warning"
+                            : booking.status === "cancelled"
+                              ? "destructive"
                               : "default"
                         }
                       >

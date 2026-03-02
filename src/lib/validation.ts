@@ -1,13 +1,12 @@
 import { z } from "zod";
 
 export const loginSchema = z.object({
-  email: z.string().email("Email noto'g'ri formatda"),
+  phone: z.string().min(9, "Telefon raqam noto'g'ri"),
   password: z.string().min(6, "Parol kamida 6 ta belgidan iborat bo'lishi kerak"),
 });
 
 export const registerSchema = z.object({
   name: z.string().min(2, "Ism kamida 2 ta belgidan iborat bo'lishi kerak"),
-  email: z.string().email("Email noto'g'ri formatda"),
   phone: z.string().min(9, "Telefon raqam noto'g'ri"),
   password: z.string().min(6, "Parol kamida 6 ta belgidan iborat bo'lishi kerak"),
   confirmPassword: z.string(),
