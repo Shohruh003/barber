@@ -41,7 +41,7 @@ export function BarberLayout({ children }: { children: ReactNode }) {
     <div className="flex flex-col h-[100dvh] bg-background">
       {/* Minimal header */}
       <header className="flex items-center justify-between px-4 py-3 border-b bg-background/95 backdrop-blur safe-area-top shrink-0">
-        <span className="font-bold text-lg bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
+        <span className="font-bold text-xl bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
           BarberBook
         </span>
         <button

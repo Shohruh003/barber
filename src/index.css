@@ -72,7 +72,7 @@
     display: none;
   }
   .safe-area-top {
-    padding-top: env(safe-area-inset-top, 0);
+    padding-top: max(0.75rem, env(safe-area-inset-top, 0.75rem));
   }
   .safe-area-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0);
