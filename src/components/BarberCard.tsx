@@ -103,7 +103,7 @@ export function BarberCard({ barber, onToggleAvailability }: BarberCardProps) {
             </div>
           </div>
 
-          {/* Actions */}
+
           <div className="mt-4 flex gap-2">
             {barber.isAvailable ? (
               <Button className="flex-1" size="sm" asChild>
