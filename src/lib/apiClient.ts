@@ -102,6 +102,12 @@ export async function loginAPI(
   return result;
 }
 
+export async function fetchMeAPI(): Promise<User> {
+  const user = await api<User>("/auth/me");
+  if (user.avatar) user.avatar = getAvatarUrl(user.avatar);
+  return user;
+}
+
 export async function registerAPI(data: {
   name: string;
   phone: string;

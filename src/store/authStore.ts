@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { User } from "@/types";
-import { loginAPI, registerAPI, updateProfile, uploadAvatar } from "@/lib/apiClient";
+import { loginAPI, registerAPI, fetchMeAPI, updateProfile, uploadAvatar } from "@/lib/apiClient";
 
 interface AuthState {
   user: User | null;
@@ -16,6 +16,7 @@ interface AuthState {
     password: string;
     role: "user" | "barber";
   }) => Promise<void>;
+  loadUser: () => Promise<void>;
   logout: () => void;
   updateUser: (data: Partial<User> & { oldPassword?: string; newPassword?: string }) => Promise<void>;
   uploadAvatar: (file: File) => Promise<void>;
@@ -52,6 +53,17 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
+      loadUser: async () => {
+        const token = get().token;
+        if (!token) return;
+        try {
+          const user = await fetchMeAPI();
+          set({ user });
+        } catch {
+          set({ user: null, token: null });
+        }
+      },
+
       logout: () => {
         set({ user: null, token: null });
       },
@@ -84,7 +96,7 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: "barber-auth",
-      partialize: (state) => ({ user: state.user, token: state.token }),
+      partialize: (state) => ({ token: state.token }),
     },
   ),
 );

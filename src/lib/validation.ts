@@ -26,7 +26,6 @@ export const bookingSchema = z.object({
 
 export const profileSchema = z.object({
   name: z.string().min(2, "Ism kamida 2 ta belgidan iborat bo'lishi kerak"),
-  email: z.string().email("Email noto'g'ri formatda"),
   phone: z.string().min(9, "Telefon raqam noto'g'ri"),
   oldPassword: z.string().optional(),
   newPassword: z.string().optional(),

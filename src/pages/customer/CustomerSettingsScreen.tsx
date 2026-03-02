@@ -5,7 +5,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   User,
-  Mail,
   Phone,
   Edit3,
   Check,
@@ -53,7 +52,6 @@ export default function CustomerSettingsScreen() {
     resolver: zodResolver(profileSchema),
     defaultValues: {
       name: user?.name,
-      email: user?.email,
       phone: user?.phone,
       oldPassword: "",
       newPassword: "",
@@ -75,7 +73,6 @@ export default function CustomerSettingsScreen() {
       }
       const payload: Record<string, string | undefined> = {
         name: data.name,
-        email: data.email,
         phone: data.phone,
       };
       if (data.oldPassword && data.newPassword) {
@@ -135,10 +132,6 @@ export default function CustomerSettingsScreen() {
                 {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">{t("profile.email")}</Label>
-                <Input type="email" {...register("email")} className="h-11" />
-              </div>
-              <div className="space-y-1.5">
                 <Label className="text-xs">{t("profile.phone")}</Label>
                 <Input {...register("phone")} className="h-11" />
               </div>
@@ -185,7 +178,6 @@ export default function CustomerSettingsScreen() {
                 </Avatar>
                 <div className="flex-1">
                   <p className="font-bold text-lg">{user.name}</p>
-                  <p className="text-xs text-muted-foreground flex items-center gap-1"><Mail className="h-3 w-3" />{user.email}</p>
                   <p className="text-xs text-muted-foreground flex items-center gap-1"><Phone className="h-3 w-3" />{user.phone}</p>
                 </div>
               </div>

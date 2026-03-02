@@ -1,6 +1,6 @@
 import { Suspense, useEffect, type ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { MapPin, Scissors, CalendarDays, Sparkles, Settings, Bell } from "lucide-react";
+import { MapPin, Scissors, CalendarDays, Sparkles, User, Bell } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuthStore } from "@/store/authStore";
 import { useThemeStore } from "@/store/themeStore";
@@ -13,7 +13,7 @@ const tabs = [
   { key: "barbers", icon: Scissors, path: "/customer/barbers" },
   { key: "aiStyle", icon: Sparkles, path: "/customer/ai-style" },
   { key: "bookings", icon: CalendarDays, path: "/customer/bookings" },
-  { key: "settings", icon: Settings, path: "/customer/settings" },
+  { key: "profile", icon: User, path: "/customer/settings" },
 ] as const;
 
 export function CustomerLayout({ children }: { children: ReactNode }) {

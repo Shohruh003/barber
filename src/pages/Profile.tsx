@@ -66,7 +66,7 @@ export default function Profile() {
     reset,
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
-    defaultValues: { name: user?.name, email: user?.email, phone: user?.phone, oldPassword: "", newPassword: "" },
+    defaultValues: { name: user?.name, phone: user?.phone, oldPassword: "", newPassword: "" },
   });
 
   useEffect(() => {
@@ -92,7 +92,6 @@ export default function Profile() {
 
       const payload: Record<string, string | undefined> = {
         name: data.name,
-        email: data.email,
         phone: data.phone,
       };
       if (data.oldPassword && data.newPassword) {
@@ -164,15 +163,6 @@ export default function Profile() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label>{t("profile.email")}</Label>
-                <Input type="email" {...register("email")} />
-                {errors.email && (
-                  <p className="text-sm text-destructive">
-                    {errors.email.message}
-                  </p>
-                )}
-              </div>
-              <div className="space-y-2">
                 <Label>{t("profile.phone")}</Label>
                 <Input {...register("phone")} />
                 {errors.phone && (
@@ -233,14 +223,6 @@ export default function Profile() {
           ) : (
             <>
               <div className="space-y-3 text-sm">
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-2 text-muted-foreground">
-                    <Mail className="h-4 w-4" />
-                    {t("profile.email")}
-                  </span>
-                  <span>{user.email}</span>
-                </div>
-                <Separator />
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-2 text-muted-foreground">
                     <Phone className="h-4 w-4" />

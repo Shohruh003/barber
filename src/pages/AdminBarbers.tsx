@@ -39,7 +39,6 @@ export default function AdminBarbers() {
   const [editUser, setEditUser] = useState<User | null>(null);
   const [editForm, setEditForm] = useState({
     name: "",
-    email: "",
     phone: "",
     newPassword: "",
   });
@@ -63,7 +62,6 @@ export default function AdminBarbers() {
     const q = search.toLowerCase();
     return (
       u.name.toLowerCase().includes(q) ||
-      u.email.toLowerCase().includes(q) ||
       u.phone.includes(q)
     );
   });
@@ -72,7 +70,6 @@ export default function AdminBarbers() {
     setEditUser(user);
     setEditForm({
       name: user.name,
-      email: user.email,
       phone: user.phone,
       newPassword: "",
     });
@@ -82,7 +79,6 @@ export default function AdminBarbers() {
     if (!editUser) return;
     const payload: Record<string, string> = {
       name: editForm.name,
-      email: editForm.email,
       phone: editForm.phone,
     };
     if (editForm.newPassword) {
@@ -132,7 +128,6 @@ export default function AdminBarbers() {
               <TableHead>{t("admin.avatar")}</TableHead>
               <TableHead>{t("admin.name")}</TableHead>
               <TableHead>{t("admin.phone")}</TableHead>
-              <TableHead>{t("admin.email")}</TableHead>
               <TableHead className="text-right">{t("admin.actions")}</TableHead>
             </TableRow>
           </TableHeader>
@@ -140,7 +135,7 @@ export default function AdminBarbers() {
             {filtered.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={5}
+                  colSpan={4}
                   className="text-center py-8 text-muted-foreground"
                 >
                   {t("common.noResults")}
@@ -157,7 +152,6 @@ export default function AdminBarbers() {
                   </TableCell>
                   <TableCell className="font-medium">{barber.name}</TableCell>
                   <TableCell>{barber.phone}</TableCell>
-                  <TableCell>{barber.email}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
                       <Button
@@ -201,15 +195,6 @@ export default function AdminBarbers() {
                 value={editForm.name}
                 onChange={(e) =>
                   setEditForm((f) => ({ ...f, name: e.target.value }))
-                }
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label>{t("admin.email")}</Label>
-              <Input
-                value={editForm.email}
-                onChange={(e) =>
-                  setEditForm((f) => ({ ...f, email: e.target.value }))
                 }
               />
             </div>
