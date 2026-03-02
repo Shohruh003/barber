@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Barber, Booking, User, BarberDaySchedule, BlockedSlot, BarberNotification, UserNotification, BarberClient, Review, Service } from "@/types";
 
-const API_URL = "http://localhost:5000";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 function getToken(): string | null {
   try {
