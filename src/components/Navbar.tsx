@@ -205,13 +205,16 @@ export function Navbar() {
               )}
 
               {/* Profile Avatar */}
-              <div className="flex items-center gap-2">
+              <button
+                onClick={() => navigate("/admin/settings")}
+                className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+              >
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={getAvatarUrl(user.avatar)} alt={user.name} />
                   <AvatarFallback>{user.name[0]}</AvatarFallback>
                 </Avatar>
                 <span className="text-sm font-medium">{user.name}</span>
-              </div>
+              </button>
               <Button
                 variant="ghost"
                 size="icon"
@@ -344,16 +347,19 @@ export function Navbar() {
             <div className="border-t pt-3">
               {user ? (
                 <div className="space-y-2">
-                  <div className="flex items-center gap-3 rounded-lg px-3 py-2.5">
+                  <button
+                    onClick={() => { navigate("/admin/settings"); setMobileOpen(false); }}
+                    className="w-full flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-accent transition-colors"
+                  >
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={getAvatarUrl(user.avatar)} alt={user.name} />
                       <AvatarFallback>{user.name[0]}</AvatarFallback>
                     </Avatar>
-                    <div>
+                    <div className="text-left">
                       <p className="text-sm font-medium">{user.name}</p>
                       <p className="text-xs text-muted-foreground">{user.phone}</p>
                     </div>
-                  </div>
+                  </button>
                   <Button
                     variant="outline"
                     className="w-full"

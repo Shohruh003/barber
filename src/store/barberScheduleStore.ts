@@ -2,6 +2,7 @@ import { create } from "zustand";
 import type { BarberDaySchedule, BlockedSlot, Barber } from "@/types";
 import {
   fetchBarberDaySchedule,
+  fetchBarberScheduledDates,
   saveBarberDaySchedule,
   fetchBlockedSlots,
   toggleBlockSlot,
@@ -17,9 +18,11 @@ interface BarberScheduleState {
   daySchedule: BarberDaySchedule | null;
   blockedSlots: BlockedSlot[];
   scheduleLoading: boolean;
+  scheduledDates: Set<string>;
 
   loadBarber: (barberId: string) => Promise<void>;
   loadDaySchedule: (barberId: string, date: string) => Promise<void>;
+  loadScheduledDates: (barberId: string, dates: string[]) => Promise<void>;
   saveDaySchedule: (schedule: BarberDaySchedule) => Promise<void>;
   loadBlockedSlots: (barberId: string, date: string) => Promise<void>;
   toggleBlock: (barberId: string, date: string, time: string) => Promise<void>;
@@ -35,6 +38,7 @@ export const useBarberScheduleStore = create<BarberScheduleState>()(
     daySchedule: null,
     blockedSlots: [],
     scheduleLoading: false,
+    scheduledDates: new Set<string>(),
 
     loadBarber: async (barberId) => {
       set({ barberLoading: true });
@@ -48,12 +52,33 @@ export const useBarberScheduleStore = create<BarberScheduleState>()(
         fetchBarberDaySchedule(barberId, date),
         fetchBlockedSlots(barberId, date),
       ]);
-      set({ daySchedule, blockedSlots: blocked, scheduleLoading: false });
+      set((state) => {
+        const updated = new Set(state.scheduledDates);
+        if (daySchedule && daySchedule.slots.length > 0) {
+          updated.add(date);
+        } else {
+          updated.delete(date);
+        }
+        return { daySchedule, blockedSlots: blocked, scheduleLoading: false, scheduledDates: updated };
+      });
+    },
+
+    loadScheduledDates: async (barberId, dates) => {
+      const result = await fetchBarberScheduledDates(barberId, dates);
+      set({ scheduledDates: new Set(result) });
     },
 
     saveDaySchedule: async (schedule) => {
       const saved = await saveBarberDaySchedule(schedule);
-      set({ daySchedule: saved });
+      set((state) => {
+        const updated = new Set(state.scheduledDates);
+        if (saved.slots.length > 0) {
+          updated.add(saved.date);
+        } else {
+          updated.delete(saved.date);
+        }
+        return { daySchedule: saved, scheduledDates: updated };
+      });
     },
 
     loadBlockedSlots: async (barberId, date) => {

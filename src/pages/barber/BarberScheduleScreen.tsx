@@ -43,7 +43,9 @@ export default function BarberScheduleScreen() {
     daySchedule,
     blockedSlots,
     scheduleLoading,
+    scheduledDates,
     loadDaySchedule,
+    loadScheduledDates,
     saveDaySchedule,
     toggleBlock,
     updateSlotDuration,
@@ -100,6 +102,12 @@ export default function BarberScheduleScreen() {
     () => Array.from({ length: 30 }, (_, i) => addDays(startOfDay(new Date()), i)),
     [],
   );
+
+  const dateStrings = useMemo(() => dates.map((d) => format(d, "yyyy-MM-dd")), [dates]);
+
+  useEffect(() => {
+    if (user) loadScheduledDates(user.id, dateStrings);
+  }, [user, dateStrings, loadScheduledDates]);
 
   const todayBookings = useMemo(
     () => bookings.filter((b) => b.date === selectedDate && b.status !== "cancelled"),
@@ -234,6 +242,7 @@ export default function BarberScheduleScreen() {
           const dateStr = format(date, "yyyy-MM-dd");
           const isSelected = selectedDate === dateStr;
           const isToday = dateStr === format(new Date(), "yyyy-MM-dd");
+          const hasSlots = scheduledDates.has(dateStr);
           return (
             <button
               key={dateStr}
@@ -242,8 +251,10 @@ export default function BarberScheduleScreen() {
                 "flex flex-col items-center min-w-[64px] rounded-xl border p-2.5 transition-all touch-target shrink-0",
                 isSelected
                   ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border hover:border-primary/50",
-                isToday && !isSelected && "border-primary/40",
+                  : hasSlots
+                    ? "border-border hover:border-primary/50"
+                    : "border-border/50 opacity-40",
+                isToday && !isSelected && "border-primary/40 opacity-100",
               )}
             >
               <span className="text-[10px] font-medium uppercase">{format(date, "EEE")}</span>

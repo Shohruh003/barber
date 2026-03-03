@@ -1,15 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  Phone,
   Edit3,
   Check,
-  Camera,
-  Eye,
-  EyeOff,
   MapPin,
   Globe,
   Moon,
@@ -22,15 +16,12 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { phoneToRaw } from "@/components/PhoneInput";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { useAuthStore } from "@/store/authStore";
 import { useBarberScheduleStore } from "@/store/barberScheduleStore";
 import { useThemeStore } from "@/store/themeStore";
-import { profileSchema, type ProfileFormData } from "@/lib/validation";
 import {
   updateBarberProfile as updateBarberProfileAPI,
   getAvatarUrl,
@@ -42,92 +33,31 @@ import toast from "react-hot-toast";
 export default function BarberSettingsScreen() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { user, updateUser, uploadAvatar, logout } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const { barber, loadBarber } = useBarberScheduleStore();
   const { theme, toggleTheme } = useThemeStore();
 
-  const [editMode, setEditMode] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState("");
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState("");
-  const [showOldPass, setShowOldPass] = useState(false);
-  const [showNewPass, setShowNewPass] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [geoAddress, setGeoAddress] = useState("");
-  const [geoLat, setGeoLat] = useState<number | undefined>();
-  const [geoLng, setGeoLng] = useState<number | undefined>();
+  const [geoAddress, setGeoAddress] = useState(() => barber?.geoAddress || "");
+  const [geoLat, setGeoLat] = useState<number | undefined>(() => barber?.latitude);
+  const [geoLng, setGeoLng] = useState<number | undefined>(() => barber?.longitude);
   const [showMap, setShowMap] = useState(false);
-  const [reminderDays, setReminderDays] = useState(14);
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isDirty },
-    reset,
-  } = useForm<ProfileFormData>({
-    resolver: zodResolver(profileSchema),
-    defaultValues: {
-      name: user?.name,
-      phone: user?.phone,
-      oldPassword: "",
-      newPassword: "",
-    },
-  });
+  const [reminderDays, setReminderDays] = useState(() => barber?.reminderDays || 14);
 
   useEffect(() => {
     if (user) loadBarber(user.id);
   }, [user, loadBarber]);
 
-  useEffect(() => {
-    if (barber) {
-      setGeoAddress(barber.geoAddress || "");
-      setGeoLat(barber.latitude);
-      setGeoLng(barber.longitude);
-      setReminderDays(barber.reminderDays || 14);
-    }
-    if (user?.avatar) setAvatarUrl(user.avatar);
-  }, [barber, user]);
-
-  useEffect(() => {
-    if (!user) return;
-    if (editMode) return;
-    reset({
-      name: user.name,
-      phone: user.phone,
-      oldPassword: "",
-      newPassword: "",
-    });
-  }, [user, editMode, reset]);
+  // Sync barber data when loaded
+  const barberGeo = barber?.geoAddress || "";
+  const barberLat = barber?.latitude;
+  const barberLng = barber?.longitude;
+  const barberReminder = barber?.reminderDays || 14;
+  if (barberGeo !== geoAddress && barberGeo) setGeoAddress(barberGeo);
+  if (barberLat !== geoLat && barberLat !== undefined) setGeoLat(barberLat);
+  if (barberLng !== geoLng && barberLng !== undefined) setGeoLng(barberLng);
+  if (barberReminder !== reminderDays && barber) setReminderDays(barberReminder);
 
   if (!user) return null;
-
-  const onProfileSave = async (data: ProfileFormData) => {
-    try {
-      setSaving(true);
-      // Upload avatar file first if selected
-      if (avatarFile) {
-        await uploadAvatar(avatarFile);
-        setAvatarFile(null);
-        setAvatarPreview("");
-      }
-
-      const payload: Record<string, string | undefined> = {
-        name: data.name,
-        phone: phoneToRaw(data.phone),
-      };
-      if (data.oldPassword && data.newPassword) {
-        payload.oldPassword = data.oldPassword;
-        payload.newPassword = data.newPassword;
-      }
-      await updateUser(payload);
-      setEditMode(false);
-      toast.success(t("profile.profileUpdated"));
-    } catch {
-      toast.error("Xatolik yuz berdi");
-    } finally {
-      setSaving(false);
-    }
-  };
 
   const handleSaveGeo = async (lat: number, lng: number, address: string) => {
     if (!barber) return;
@@ -173,176 +103,24 @@ export default function BarberSettingsScreen() {
     <div className="px-4 py-4 space-y-4 animate-fade-in">
       {/* Profile card */}
       <Card>
-        <CardContent className="pt-5 pb-4">
-          {editMode ? (
-            <form onSubmit={handleSubmit(onProfileSave)} className="space-y-3">
-              <div className="flex justify-center mb-3">
-                <div className="relative">
-                  <Avatar className="h-20 w-20">
-                    <AvatarImage
-                      src={
-                        avatarPreview ||
-                        getAvatarUrl(avatarUrl) ||
-                        getAvatarUrl(user.avatar)
-                      }
-                    />
-                    <AvatarFallback className="text-2xl">
-                      {user.name[0]}
-                    </AvatarFallback>
-                  </Avatar>
-                  <label className="absolute bottom-0 right-0 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-foreground shadow">
-                    <Camera className="h-3.5 w-3.5" />
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          setAvatarFile(file);
-                          setAvatarPreview(URL.createObjectURL(file));
-                        }
-                        e.target.value = "";
-                      }}
-                    />
-                  </label>
-                </div>
-              </div>
+        <CardContent className="relative pt-5 pb-5">
+          <button
+            onClick={() => navigate("/barber/account-edit")}
+            className="absolute top-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 hover:bg-primary/20 transition-colors"
+          >
+            <Edit3 className="h-4 w-4 text-primary" />
+          </button>
 
-              <div className="space-y-1.5">
-                <Label className="text-xs">{t("profile.name")}</Label>
-                <Input {...register("name")} className="h-11" />
-                {errors.name && (
-                  <p className="text-xs text-destructive">
-                    {errors.name.message}
-                  </p>
-                )}
-              </div>
-              <Separator />
-              <p className="text-xs text-muted-foreground">
-                {t("profile.changePassword")}
-              </p>
-
-              <div className="space-y-1.5">
-                <Label className="text-xs">{t("profile.oldPassword")}</Label>
-                <div className="relative">
-                  <Input
-                    type={showOldPass ? "text" : "password"}
-                    {...register("oldPassword")}
-                    placeholder="••••••"
-                    className="h-11"
-                  />
-                  <button
-                    type="button"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
-                    onClick={() => setShowOldPass(!showOldPass)}
-                  >
-                    {showOldPass ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">{t("profile.newPassword")}</Label>
-                <div className="relative">
-                  <Input
-                    type={showNewPass ? "text" : "password"}
-                    {...register("newPassword")}
-                    placeholder="••••••"
-                    className="h-11"
-                  />
-                  <button
-                    type="button"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
-                    onClick={() => setShowNewPass(!showNewPass)}
-                  >
-                    {showNewPass ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
-                {errors.newPassword && (
-                  <p className="text-xs text-destructive">
-                    {errors.newPassword.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="flex gap-2 pt-1">
-                <Button
-                  type="submit"
-                  size="sm"
-                  className="flex-1 h-10"
-                  disabled={saving || (!isDirty && !avatarFile)}
-                >
-                  <Check className="h-4 w-4 mr-1" />
-                  {saving ? t("common.loading") : t("common.save")}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="h-10"
-                  onClick={() => {
-                    setEditMode(false);
-                    reset();
-                    setAvatarFile(null);
-                    setAvatarPreview("");
-                    setAvatarUrl(user.avatar || "");
-                  }}
-                >
-                  {t("common.cancel")}
-                </Button>
-              </div>
-            </form>
-          ) : (
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <Avatar className="h-16 w-16">
-                  <AvatarImage
-                    src={
-                      avatarPreview ||
-                      getAvatarUrl(avatarUrl) ||
-                      getAvatarUrl(user.avatar)
-                    }
-                  />
-                  <AvatarFallback className="text-xl">
-                    {user.name[0]}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <p className="font-bold text-lg">{user.name}</p>
-                  <p className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Phone className="h-3 w-3" />
-                    {user.phone}
-                  </p>
-                </div>
-              </div>
-              <Button
-                variant="outline"
-                className="w-full h-10"
-                onClick={() => {
-                  reset({
-                    name: user.name,
-                    phone: user.phone,
-                    oldPassword: "",
-                    newPassword: "",
-                  });
-                  setAvatarFile(null);
-                  setAvatarPreview("");
-                  setEditMode(true);
-                }}
-              >
-                <Edit3 className="h-4 w-4 mr-2" />
-                {t("profile.editProfile")}
-              </Button>
+          <div className="flex flex-col items-center text-center space-y-3">
+            <Avatar className="h-24 w-24">
+              <AvatarImage src={getAvatarUrl(user.avatar)} />
+              <AvatarFallback className="text-3xl">{user.name[0]}</AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="font-bold text-xl">{user.name}</p>
+              <p className="text-sm text-muted-foreground mt-0.5">{user.phone}</p>
             </div>
-          )}
+          </div>
         </CardContent>
       </Card>
 
@@ -456,7 +234,6 @@ export default function BarberSettingsScreen() {
       {/* Language + Theme */}
       <Card>
         <CardContent className="p-4 space-y-4">
-          {/* Language */}
           <div className="space-y-2.5">
             <div className="flex items-center gap-2">
               <Globe className="h-5 w-5 text-primary" />
@@ -483,7 +260,6 @@ export default function BarberSettingsScreen() {
 
           <Separator />
 
-          {/* Theme */}
           <button onClick={toggleTheme} className="w-full flex items-center justify-between">
             <div className="flex items-center gap-2">
               {theme === "dark" ? <Moon className="h-5 w-5 text-primary" /> : <Sun className="h-5 w-5 text-primary" />}

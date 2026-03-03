@@ -19,6 +19,8 @@ const AdminDashboard = lazy(() => import("@/pages/AdminDashboard"));
 const AdminBookings = lazy(() => import("@/pages/AdminBookings"));
 const AdminUsers = lazy(() => import("@/pages/AdminUsers"));
 const AdminBarbers = lazy(() => import("@/pages/AdminBarbers"));
+const AdminSettingsScreen = lazy(() => import("@/pages/admin/AdminSettingsScreen"));
+const AdminProfileEditScreen = lazy(() => import("@/pages/admin/AdminProfileEditScreen"));
 
 // Barber mobile pages
 const BarberScheduleScreen = lazy(() => import("@/pages/barber/BarberScheduleScreen"));
@@ -27,6 +29,7 @@ const BarberNotificationsScreen = lazy(() => import("@/pages/barber/BarberNotifi
 const BarberSettingsScreen = lazy(() => import("@/pages/barber/BarberSettingsScreen"));
 const BarberProfileEditScreen = lazy(() => import("@/pages/barber/BarberProfileEditScreen"));
 const BarberStatsScreen = lazy(() => import("@/pages/barber/BarberStatsScreen"));
+const BarberAccountEditScreen = lazy(() => import("@/pages/barber/BarberAccountEditScreen"));
 
 // Customer mobile pages
 const CustomerMapScreen = lazy(() => import("@/pages/customer/CustomerMapScreen"));
@@ -37,6 +40,7 @@ const CustomerBarberDetailScreen = lazy(() => import("@/pages/customer/CustomerB
 const CustomerBookingPage = lazy(() => import("@/pages/customer/CustomerBookingPage"));
 const CustomerNotificationsScreen = lazy(() => import("@/pages/customer/CustomerNotificationsScreen"));
 const CustomerAIStyleScreen = lazy(() => import("@/pages/customer/CustomerAIStyleScreen"));
+const CustomerProfileEditScreen = lazy(() => import("@/pages/customer/CustomerProfileEditScreen"));
 
 function AuthHeader() {
   return (
@@ -81,6 +85,7 @@ function AppRoutes() {
           <Route path="/barber/settings" element={<BarberSettingsScreen />} />
           <Route path="/barber/profile-edit" element={<BarberProfileEditScreen />} />
           <Route path="/barber/stats" element={<BarberStatsScreen />} />
+          <Route path="/barber/account-edit" element={<BarberAccountEditScreen />} />
           <Route path="*" element={<Navigate to="/barber/schedule" replace />} />
         </Routes>
       </BarberLayout>
@@ -98,6 +103,7 @@ function AppRoutes() {
           <Route path="/customer/booking/:barberId" element={<CustomerBookingPage />} />
           <Route path="/customer/bookings" element={<CustomerBookingsScreen />} />
           <Route path="/customer/settings" element={<CustomerSettingsScreen />} />
+          <Route path="/customer/profile-edit" element={<CustomerProfileEditScreen />} />
           <Route path="/customer/notifications" element={<CustomerNotificationsScreen />} />
           <Route path="/customer/ai-style" element={<CustomerAIStyleScreen />} />
           <Route path="*" element={<Navigate to="/customer/barbers" replace />} />
@@ -118,6 +124,8 @@ function AppRoutes() {
               <Route path="/admin/bookings" element={<AdminBookings />} />
               <Route path="/admin/users" element={<AdminUsers />} />
               <Route path="/admin/barbers" element={<AdminBarbers />} />
+              <Route path="/admin/settings" element={<AdminSettingsScreen />} />
+              <Route path="/admin/profile-edit" element={<AdminProfileEditScreen />} />
               <Route path="*" element={<Navigate to="/admin" replace />} />
             </Routes>
           </Suspense>

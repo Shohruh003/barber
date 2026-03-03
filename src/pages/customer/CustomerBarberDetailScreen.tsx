@@ -5,7 +5,6 @@ import {
   Star,
   MapPin,
   Clock,
-  Phone,
   ArrowLeft,
   Calendar,
   Heart,
@@ -145,47 +144,6 @@ export default function CustomerBarberDetailScreen() {
 
           {/* Contact / Aloqa */}
           <TabsContent value="contact" className="mt-3 space-y-3">
-            {/* Social + Phone */}
-            <Card>
-              <CardContent className="p-3 space-y-2.5">
-                {/* Phone */}
-                <a href={`tel:${barber.phone}`} className="flex items-center gap-3 text-sm">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-green-500/10 shrink-0">
-                    <Phone className="h-4 w-4 text-green-500" />
-                  </div>
-                  <span className="font-medium">{barber.phone}</span>
-                </a>
-                {/* Social Links */}
-                {barber.socialLinks?.instagram && (
-                  <a href={`https://instagram.com/${barber.socialLinks.instagram}`} target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-3 text-sm">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 shrink-0">
-                      <Instagram className="h-4 w-4 text-white" />
-                    </div>
-                    <span className="font-medium">@{barber.socialLinks.instagram}</span>
-                  </a>
-                )}
-                {barber.socialLinks?.telegram && (
-                  <a href={`https://t.me/${barber.socialLinks.telegram}`} target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-3 text-sm">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#2AABEE]/10 shrink-0">
-                      <Send className="h-4 w-4 text-[#2AABEE]" />
-                    </div>
-                    <span className="font-medium">@{barber.socialLinks.telegram}</span>
-                  </a>
-                )}
-                {barber.socialLinks?.facebook && (
-                  <a href={`https://facebook.com/${barber.socialLinks.facebook}`} target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-3 text-sm">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1877F2]/10 shrink-0">
-                      <Facebook className="h-4 w-4 text-[#1877F2]" />
-                    </div>
-                    <span className="font-medium">{barber.socialLinks.facebook}</span>
-                  </a>
-                )}
-              </CardContent>
-            </Card>
-
             {/* Working Hours */}
             <Card>
               <CardContent className="p-3 space-y-2">
@@ -242,6 +200,41 @@ export default function CustomerBarberDetailScreen() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Social Links */}
+            {(barber.socialLinks?.instagram || barber.socialLinks?.telegram || barber.socialLinks?.facebook) && (
+              <Card>
+                <CardContent className="p-3 space-y-2.5">
+                  {barber.socialLinks?.instagram && (
+                    <a href={`https://instagram.com/${barber.socialLinks.instagram}`} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-3 text-sm">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 shrink-0">
+                        <Instagram className="h-4 w-4 text-white" />
+                      </div>
+                      <span className="font-medium">@{barber.socialLinks.instagram}</span>
+                    </a>
+                  )}
+                  {barber.socialLinks?.telegram && (
+                    <a href={`https://t.me/${barber.socialLinks.telegram}`} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-3 text-sm">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#2AABEE]/10 shrink-0">
+                        <Send className="h-4 w-4 text-[#2AABEE]" />
+                      </div>
+                      <span className="font-medium">@{barber.socialLinks.telegram}</span>
+                    </a>
+                  )}
+                  {barber.socialLinks?.facebook && (
+                    <a href={`https://facebook.com/${barber.socialLinks.facebook}`} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-3 text-sm">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1877F2]/10 shrink-0">
+                        <Facebook className="h-4 w-4 text-[#1877F2]" />
+                      </div>
+                      <span className="font-medium">{barber.socialLinks.facebook}</span>
+                    </a>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           {/* Services */}

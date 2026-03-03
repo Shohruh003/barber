@@ -3,7 +3,6 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   Star,
-  Phone,
   Clock,
   Navigation,
   MapPin,
@@ -313,12 +312,6 @@ export default function CustomerMapScreen() {
                     </div>
                   </div>
                 </div>
-
-                {/* Phone */}
-                <a href={`tel:${selectedBarber.phone}`} className="flex items-center gap-2 text-sm">
-                  <Phone className="h-4 w-4 text-green-500" />
-                  <span>{selectedBarber.phone}</span>
-                </a>
 
                 {/* Today hours */}
                 {getTodayHours(selectedBarber) && (

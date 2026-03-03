@@ -16,7 +16,7 @@ import { useThemeStore } from "@/store/themeStore";
 import { getAvatarUrl } from "@/lib/apiClient";
 import { cn } from "@/lib/utils";
 
-export default function CustomerSettingsScreen() {
+export default function AdminSettingsScreen() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
@@ -37,19 +37,17 @@ export default function CustomerSettingsScreen() {
   ];
 
   return (
-    <div className="px-4 py-4 space-y-4 animate-fade-in">
+    <div className="container max-w-lg mx-auto py-8 px-4 space-y-4 animate-fade-in">
       {/* Profile card */}
       <Card>
         <CardContent className="relative pt-5 pb-5">
-          {/* Edit button top-right */}
           <button
-            onClick={() => navigate("/customer/profile-edit")}
+            onClick={() => navigate("/admin/profile-edit")}
             className="absolute top-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 hover:bg-primary/20 transition-colors"
           >
             <Edit3 className="h-4 w-4 text-primary" />
           </button>
 
-          {/* Centered avatar + info */}
           <div className="flex flex-col items-center text-center space-y-3">
             <Avatar className="h-24 w-24">
               <AvatarImage src={getAvatarUrl(user.avatar)} />
@@ -76,7 +74,7 @@ export default function CustomerSettingsScreen() {
                 key={lang.code}
                 onClick={() => i18n.changeLanguage(lang.code)}
                 className={cn(
-                  "flex-1 rounded-xl border p-2.5 text-center transition-all touch-target",
+                  "flex-1 rounded-xl border p-2.5 text-center transition-all",
                   currentLang === lang.code
                     ? "border-primary bg-primary/10 text-primary font-semibold"
                     : "border-border hover:border-primary/50",
@@ -120,8 +118,6 @@ export default function CustomerSettingsScreen() {
         <LogOut className="h-5 w-5 mr-2" />
         {t("barberApp.logout")}
       </Button>
-
-      <div className="h-4" />
     </div>
   );
 }

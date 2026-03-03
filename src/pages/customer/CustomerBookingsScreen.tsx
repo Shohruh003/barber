@@ -158,15 +158,13 @@ export default function CustomerBookingsScreen() {
                   <CheckCircle2 className="h-3 w-3 mr-1" />
                   {t("profile.completeBooking")}
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 text-xs text-destructive hover:text-destructive"
+                <button
+                  className="inline-flex items-center justify-center h-8 px-3 rounded-md text-xs font-medium border border-red-500/50 bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
                   onClick={() => setCancelId(booking.id)}
                 >
                   <X className="h-3 w-3 mr-1" />
                   {t("profile.cancelBooking")}
-                </Button>
+                </button>
               </div>
             )}
           </div>
