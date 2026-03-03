@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Scissors, Eye, EyeOff, User, UserCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PhoneInput, phoneToRaw } from "@/components/PhoneInput";
 import {
   Card,
   CardContent,
@@ -29,6 +30,7 @@ export default function Register() {
   const {
     register,
     handleSubmit,
+    control,
     setValue,
     watch,
     formState: { errors },
@@ -42,7 +44,7 @@ export default function Register() {
   const onSubmit = async (data: RegisterFormData) => {
     await registerUser({
       name: data.name,
-      phone: data.phone,
+      phone: phoneToRaw(data.phone),
       password: data.password,
       role: data.role,
     });
@@ -125,12 +127,15 @@ export default function Register() {
 
             <div className="space-y-2">
               <Label htmlFor="phone">{t("auth.phone")}</Label>
-              <Input
-                id="phone"
-                type="tel"
-                placeholder="+998 90 123 45 67"
-                {...register("phone")}
-                aria-invalid={!!errors.phone}
+              <Controller
+                name="phone"
+                control={control}
+                render={({ field }) => (
+                  <PhoneInput
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
               />
               {errors.phone && (
                 <p className="text-sm text-destructive">{errors.phone.message}</p>

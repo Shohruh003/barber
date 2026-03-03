@@ -23,6 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { phoneToRaw } from "@/components/PhoneInput";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
@@ -112,7 +113,7 @@ export default function BarberSettingsScreen() {
 
       const payload: Record<string, string | undefined> = {
         name: data.name,
-        phone: data.phone,
+        phone: phoneToRaw(data.phone),
       };
       if (data.oldPassword && data.newPassword) {
         payload.oldPassword = data.oldPassword;
@@ -217,11 +218,6 @@ export default function BarberSettingsScreen() {
                   </p>
                 )}
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">{t("profile.phone")}</Label>
-                <Input {...register("phone")} className="h-11" />
-              </div>
-
               <Separator />
               <p className="text-xs text-muted-foreground">
                 {t("profile.changePassword")}
