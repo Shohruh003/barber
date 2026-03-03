@@ -150,6 +150,7 @@ function App() {
       <AppRoutes />
       <Toaster
         position="top-center"
+        containerStyle={{ top: 72 }}
         toastOptions={{
           className: "!bg-card !text-card-foreground !border !shadow-lg",
           duration: 3000,
