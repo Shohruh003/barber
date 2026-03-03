@@ -1,13 +1,16 @@
 import { z } from "zod";
 
+const uzPhoneRegex = /^(?:\+998|0)?[\s.-]*(20|33|50|55|70|71|72|73|74|75|76|77|78|79|88|90|91|93|94|95|97|98|99)[\s.-]*\d{3}[\s.-]*\d{2}[\s.-]*\d{2}$/;
+const phoneField = z.string().regex(uzPhoneRegex, "Telefon raqam noto'g'ri");
+
 export const loginSchema = z.object({
-  phone: z.string().min(9, "Telefon raqam noto'g'ri"),
+  phone: phoneField,
   password: z.string().min(6, "Parol kamida 6 ta belgidan iborat bo'lishi kerak"),
 });
 
 export const registerSchema = z.object({
   name: z.string().min(2, "Ism kamida 2 ta belgidan iborat bo'lishi kerak"),
-  phone: z.string().min(9, "Telefon raqam noto'g'ri"),
+  phone: phoneField,
   password: z.string().min(6, "Parol kamida 6 ta belgidan iborat bo'lishi kerak"),
   confirmPassword: z.string(),
   role: z.enum(["user", "barber"]),
@@ -26,7 +29,7 @@ export const bookingSchema = z.object({
 
 export const profileSchema = z.object({
   name: z.string().min(2, "Ism kamida 2 ta belgidan iborat bo'lishi kerak"),
-  phone: z.string().min(9, "Telefon raqam noto'g'ri"),
+  phone: phoneField,
   oldPassword: z.string().optional(),
   newPassword: z.string().optional(),
 }).refine((data) => {
@@ -40,7 +43,7 @@ export const profileSchema = z.object({
 });
 
 export const forgotPasswordSchema = z.object({
-  phone: z.string().min(9, "Telefon raqam noto'g'ri"),
+  phone: phoneField,
 });
 
 export const newPasswordSchema = z.object({

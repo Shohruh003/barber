@@ -9,6 +9,7 @@ import {
   Heart,
   Scissors,
   Calendar,
+  MapPin,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -289,6 +290,15 @@ export default function CustomerBarbersScreen() {
           </div>
         )}
       </div>
+
+      {/* Floating map button */}
+      <button
+        onClick={() => navigate("/customer/map")}
+        className="fixed bottom-20 right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors"
+        aria-label={t("customerApp.viewOnMap")}
+      >
+        <MapPin className="h-5 w-5" />
+      </button>
     </div>
   );
 }

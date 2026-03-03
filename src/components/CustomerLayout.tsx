@@ -1,6 +1,6 @@
 import { Suspense, useEffect, type ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { MapPin, Scissors, CalendarDays, Sparkles, User, Bell } from "lucide-react";
+import { Scissors, CalendarDays, Sparkles, User, Bell } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuthStore } from "@/store/authStore";
 import { useThemeStore } from "@/store/themeStore";
@@ -9,7 +9,6 @@ import { useUserNotificationStore } from "@/store/userNotificationStore";
 import { PageLoader } from "@/components/LoadingSpinner";
 
 const tabs = [
-  { key: "map", icon: MapPin, path: "/customer/map" },
   { key: "barbers", icon: Scissors, path: "/customer/barbers" },
   { key: "aiStyle", icon: Sparkles, path: "/customer/ai-style" },
   { key: "bookings", icon: CalendarDays, path: "/customer/bookings" },

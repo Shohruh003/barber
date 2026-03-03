@@ -100,7 +100,7 @@ function AppRoutes() {
           <Route path="/customer/settings" element={<CustomerSettingsScreen />} />
           <Route path="/customer/notifications" element={<CustomerNotificationsScreen />} />
           <Route path="/customer/ai-style" element={<CustomerAIStyleScreen />} />
-          <Route path="*" element={<Navigate to="/customer/map" replace />} />
+          <Route path="*" element={<Navigate to="/customer/barbers" replace />} />
         </Routes>
       </CustomerLayout>
     );

@@ -23,6 +23,26 @@ import type { RegisterFormData } from "@/lib/validation";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 
+const SMS_RATE_KEY = "sms_reg_attempts";
+const SMS_MAX_PER_HOUR = 3;
+
+function checkSmsRateLimit(): boolean {
+  const raw = localStorage.getItem(SMS_RATE_KEY);
+  const attempts: number[] = raw ? JSON.parse(raw) : [];
+  const oneHourAgo = Date.now() - 60 * 60 * 1000;
+  const recent = attempts.filter((t) => t > oneHourAgo);
+  return recent.length < SMS_MAX_PER_HOUR;
+}
+
+function recordSmsAttempt() {
+  const raw = localStorage.getItem(SMS_RATE_KEY);
+  const attempts: number[] = raw ? JSON.parse(raw) : [];
+  const oneHourAgo = Date.now() - 60 * 60 * 1000;
+  const recent = attempts.filter((t) => t > oneHourAgo);
+  recent.push(Date.now());
+  localStorage.setItem(SMS_RATE_KEY, JSON.stringify(recent));
+}
+
 export default function Register() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -62,10 +82,15 @@ export default function Register() {
 
   // Step 1: send code
   const onSubmitForm = async (data: RegisterFormData) => {
+    if (!checkSmsRateLimit()) {
+      toast.error(t("auth.smsRateLimit"));
+      return;
+    }
     try {
       setIsSubmitting(true);
       const rawPhone = phoneToRaw(data.phone);
       await sendRegistrationCodeAPI(rawPhone);
+      recordSmsAttempt();
       setRegistrationData({
         name: data.name,
         phone: rawPhone,
@@ -102,8 +127,13 @@ export default function Register() {
 
   const handleResend = async () => {
     if (!registrationData || countdown > 0) return;
+    if (!checkSmsRateLimit()) {
+      toast.error(t("auth.smsRateLimit"));
+      return;
+    }
     try {
       await sendRegistrationCodeAPI(registrationData.phone);
+      recordSmsAttempt();
       setCountdown(60);
       setOtpValue("");
       toast.success(t("auth.codeSent"));
