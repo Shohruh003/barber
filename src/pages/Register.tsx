@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Scissors, Eye, EyeOff, User, UserCog } from "lucide-react";
+import { Scissors, Eye, EyeOff, User, UserCog, Smartphone, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PhoneInput, phoneToRaw } from "@/components/PhoneInput";
+import { OtpInput } from "@/components/OtpInput";
 import {
   Card,
   CardContent,
@@ -16,6 +17,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { useAuthStore } from "@/store/authStore";
+import { sendRegistrationCodeAPI, verifyRegistrationCodeAPI } from "@/lib/apiClient";
 import { registerSchema } from "@/lib/validation";
 import type { RegisterFormData } from "@/lib/validation";
 import { cn } from "@/lib/utils";
@@ -26,6 +28,16 @@ export default function Register() {
   const navigate = useNavigate();
   const { register: registerUser, isLoading } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
+  const [step, setStep] = useState<"form" | "otp">("form");
+  const [registrationData, setRegistrationData] = useState<{
+    name: string;
+    phone: string;
+    password: string;
+    role: "user" | "barber";
+  } | null>(null);
+  const [otpValue, setOtpValue] = useState("");
+  const [countdown, setCountdown] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
@@ -41,21 +53,115 @@ export default function Register() {
 
   const selectedRole = watch("role");
 
-  const onSubmit = async (data: RegisterFormData) => {
-    await registerUser({
-      name: data.name,
-      phone: phoneToRaw(data.phone),
-      password: data.password,
-      role: data.role,
-    });
-    toast.success(t("common.success"));
-    if (data.role === "barber") {
-      navigate("/profile", { replace: true });
-    } else {
-      navigate("/", { replace: true });
+  // Countdown timer for resend
+  useEffect(() => {
+    if (step !== "otp" || countdown <= 0) return;
+    const timer = setInterval(() => setCountdown((c) => c - 1), 1000);
+    return () => clearInterval(timer);
+  }, [step, countdown]);
+
+  // Step 1: send code
+  const onSubmitForm = async (data: RegisterFormData) => {
+    try {
+      setIsSubmitting(true);
+      const rawPhone = phoneToRaw(data.phone);
+      await sendRegistrationCodeAPI(rawPhone);
+      setRegistrationData({
+        name: data.name,
+        phone: rawPhone,
+        password: data.password,
+        role: data.role,
+      });
+      setStep("otp");
+      setCountdown(60);
+      toast.success(t("auth.codeSent"));
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : t("common.error");
+      toast.error(message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
+  // Step 2: verify code and register
+  const onVerifyOtp = async () => {
+    if (otpValue.length !== 4 || !registrationData) return;
+    try {
+      setIsSubmitting(true);
+      await verifyRegistrationCodeAPI(registrationData.phone, otpValue);
+      await registerUser(registrationData);
+      toast.success(t("common.success"));
+      navigate(registrationData.role === "barber" ? "/profile" : "/", { replace: true });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : t("auth.wrongCode");
+      toast.error(message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (!registrationData || countdown > 0) return;
+    try {
+      await sendRegistrationCodeAPI(registrationData.phone);
+      setCountdown(60);
+      setOtpValue("");
+      toast.success(t("auth.codeSent"));
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : t("common.error");
+      toast.error(message);
+    }
+  };
+
+  // OTP step
+  if (step === "otp") {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center px-4 py-12 animate-fade-in">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center space-y-2">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+              <Smartphone className="h-6 w-6 text-primary" />
+            </div>
+            <CardTitle className="text-2xl">{t("auth.verifyPhone")}</CardTitle>
+            <CardDescription>
+              {t("auth.codeSentTo")} {registrationData?.phone}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <OtpInput value={otpValue} onChange={setOtpValue} disabled={isSubmitting} />
+
+            <Button
+              className="w-full h-11"
+              disabled={otpValue.length !== 4 || isSubmitting}
+              onClick={onVerifyOtp}
+            >
+              {isSubmitting ? t("common.loading") : t("auth.verify")}
+            </Button>
+
+            <div className="text-center text-sm text-muted-foreground">
+              {countdown > 0 ? (
+                <span>{t("auth.resendIn")} {countdown} {t("auth.seconds")}</span>
+              ) : (
+                <button onClick={handleResend} className="text-primary hover:underline">
+                  {t("auth.resendCode")}
+                </button>
+              )}
+            </div>
+
+            <button
+              onClick={() => { setStep("form"); setOtpValue(""); }}
+              className="w-full flex items-center justify-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              {t("common.back")}
+            </button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Form step
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12 animate-fade-in">
       <Card className="w-full max-w-md">
@@ -68,7 +174,7 @@ export default function Register() {
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-4">
             {/* Role Selector */}
             <div className="space-y-2">
               <Label>{t("auth.role")}</Label>
@@ -188,8 +294,8 @@ export default function Register() {
               )}
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? t("common.loading") : t("auth.register")}
+            <Button type="submit" className="w-full" disabled={isSubmitting || isLoading}>
+              {isSubmitting || isLoading ? t("common.loading") : t("auth.register")}
             </Button>
           </form>
 

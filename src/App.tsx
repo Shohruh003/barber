@@ -12,6 +12,7 @@ import { useAuthStore } from "@/store/authStore";
 
 const Login = lazy(() => import("@/pages/Login"));
 const Register = lazy(() => import("@/pages/Register"));
+const ForgotPassword = lazy(() => import("@/pages/ForgotPassword"));
 
 // Admin pages
 const AdminDashboard = lazy(() => import("@/pages/AdminDashboard"));
@@ -134,6 +135,7 @@ function AppRoutes() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </Suspense>

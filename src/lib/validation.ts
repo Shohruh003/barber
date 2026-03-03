@@ -39,7 +39,21 @@ export const profileSchema = z.object({
   path: ["newPassword"],
 });
 
+export const forgotPasswordSchema = z.object({
+  phone: z.string().min(9, "Telefon raqam noto'g'ri"),
+});
+
+export const newPasswordSchema = z.object({
+  password: z.string().min(6, "Parol kamida 6 ta belgidan iborat bo'lishi kerak"),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Parollar mos kelmadi",
+  path: ["confirmPassword"],
+});
+
 export type LoginFormData = z.infer<typeof loginSchema>;
 export type RegisterFormData = z.infer<typeof registerSchema>;
 export type BookingFormData = z.infer<typeof bookingSchema>;
 export type ProfileFormData = z.infer<typeof profileSchema>;
+export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
+export type NewPasswordFormData = z.infer<typeof newPasswordSchema>;

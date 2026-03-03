@@ -123,6 +123,42 @@ export async function registerAPI(data: {
   return result;
 }
 
+// ---------- SMS VERIFICATION ----------
+export async function sendRegistrationCodeAPI(phone: string): Promise<{ message: string; expiresIn: number }> {
+  return api("/auth/register/send-code", {
+    method: "POST",
+    body: JSON.stringify({ phone }),
+  }, true);
+}
+
+export async function verifyRegistrationCodeAPI(phone: string, code: string): Promise<boolean> {
+  return api("/auth/register/verify-code", {
+    method: "POST",
+    body: JSON.stringify({ phone, code }),
+  }, true);
+}
+
+export async function sendResetCodeAPI(phone: string): Promise<{ message: string; expiresIn: number }> {
+  return api("/auth/forgot-password/send-code", {
+    method: "POST",
+    body: JSON.stringify({ phone }),
+  }, true);
+}
+
+export async function verifyResetCodeAPI(phone: string, code: string): Promise<boolean> {
+  return api("/auth/forgot-password/verify-code", {
+    method: "POST",
+    body: JSON.stringify({ phone, code }),
+  }, true);
+}
+
+export async function resetPasswordAPI(phone: string, password: string): Promise<{ message: string }> {
+  return api("/auth/forgot-password/reset", {
+    method: "POST",
+    body: JSON.stringify({ phone, password }),
+  }, true);
+}
+
 // ---------- BARBERS ----------
 export async function fetchBarbers(): Promise<Barber[]> {
   const raw = await api<Record<string, any>[]>("/barbers");
