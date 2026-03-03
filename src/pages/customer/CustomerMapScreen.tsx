@@ -95,7 +95,7 @@ export default function CustomerMapScreen() {
           iconContentLayout: ymaps.templateLayoutFactory.createClass(
             barber.avatar
               ? '<div class="barber-marker"><img src="' + barber.avatar + '" /></div>'
-              : '<div class="barber-marker"><div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-weight:bold;font-size:16px;">' + barber.name[0] + '</div></div>',
+              : '<div class="barber-marker"><div class="barber-marker-fallback">' + barber.name[0] + '</div></div>',
           ),
           hasBalloon: false,
           hasHint: false,

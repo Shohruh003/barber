@@ -42,29 +42,32 @@ export function CustomerLayout({ children }: { children: ReactNode }) {
   }, [user?.id, loadFavoriteIds, loadNotifications]);
 
   const unread = unreadCount;
+  const isBarberDetail = location.pathname.startsWith("/customer/barber/");
 
   return (
     <div className="flex flex-col h-[100dvh] bg-background">
-      {/* Header with notification bell */}
-      <header className="flex items-center justify-between px-4 py-3 border-b bg-background/95 backdrop-blur safe-area-top shrink-0">
-        <div className="flex items-center gap-2 font-bold text-xl">
-          <Scissors className="h-6 w-6 text-primary" />
-          <span className="bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
-            BarberBook
-          </span>
-        </div>
-        <button
-          onClick={() => navigate("/customer/notifications")}
-          className="relative flex items-center justify-center h-9 w-9"
-        >
-          <Bell className="h-5 w-5 text-foreground" />
-          {unread > 0 && (
-            <span className="absolute top-0 right-0 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-white ring-2 ring-background px-1">
-              {unread > 9 ? "9+" : unread}
+      {/* Header with notification bell (hidden on barber detail page) */}
+      {!isBarberDetail && (
+        <header className="flex items-center justify-between px-4 py-3 border-b bg-background/95 backdrop-blur safe-area-top shrink-0">
+          <div className="flex items-center gap-2 font-bold text-xl">
+            <Scissors className="h-6 w-6 text-primary" />
+            <span className="bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
+              BarberBook
             </span>
-          )}
-        </button>
-      </header>
+          </div>
+          <button
+            onClick={() => navigate("/customer/notifications")}
+            className="relative flex items-center justify-center h-9 w-9"
+          >
+            <Bell className="h-5 w-5 text-foreground" />
+            {unread > 0 && (
+              <span className="absolute top-0 right-0 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-white ring-2 ring-background px-1">
+                {unread > 9 ? "9+" : unread}
+              </span>
+            )}
+          </button>
+        </header>
+      )}
 
       {/* Scrollable content */}
       <main className="flex-1 overflow-y-auto pb-20">

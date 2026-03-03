@@ -83,6 +83,7 @@ function transformBookingServices(services: Record<string, any>[]): Service[] {
 function transformBooking(raw: Record<string, any>): Booking {
   return {
     ...raw,
+    barberAvatar: getAvatarUrl(raw.barberAvatar),
     userAvatar: getAvatarUrl(raw.userAvatar),
     services: transformBookingServices(raw.services),
     createdAt: raw.createdAt,

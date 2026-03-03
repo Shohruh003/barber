@@ -15,7 +15,8 @@
     "success": "Success!",
     "currency": "UZS",
     "close": "Close",
-    "viewAll": "View all"
+    "viewAll": "View all",
+    "copied": "Copied"
   },
   "nav": {
     "home": "Home",
@@ -290,7 +291,7 @@
     "schedule": "Schedule",
     "myClients": "My Clients",
     "notifications": "Notifications",
-    "settings": "Settings",
+    "settings": "Profile",
     "availability": "Status",
     "manualBooking": "Manual Booking",
     "clientName": "Client name",

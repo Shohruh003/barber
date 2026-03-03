@@ -15,7 +15,8 @@
     "success": "Успешно!",
     "currency": "сум",
     "close": "Закрыть",
-    "viewAll": "Смотреть все"
+    "viewAll": "Смотреть все",
+    "copied": "Скопировано"
   },
   "nav": {
     "home": "Главная",
@@ -290,7 +291,7 @@
     "schedule": "Расписание",
     "myClients": "Мои клиенты",
     "notifications": "Уведомления",
-    "settings": "Настройки",
+    "settings": "Профиль",
     "availability": "Статус",
     "manualBooking": "Ручная запись",
     "clientName": "Имя клиента",

@@ -1,6 +1,6 @@
 import { Suspense, useEffect, type ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { CalendarDays, Users, Bell, Settings, Scissors } from "lucide-react";
+import { CalendarDays, Users, BarChart3, Bell, User, Scissors } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNotificationStore } from "@/store/notificationStore";
 import { useAuthStore } from "@/store/authStore";
@@ -10,8 +10,8 @@ import { PageLoader } from "@/components/LoadingSpinner";
 const tabs = [
   { key: "schedule", icon: CalendarDays, path: "/barber/schedule" },
   { key: "myClients", icon: Users, path: "/barber/clients" },
-  { key: "notifications", icon: Bell, path: "/barber/notifications" },
-  { key: "settings", icon: Settings, path: "/barber/settings" },
+  { key: "statistics", icon: BarChart3, path: "/barber/stats" },
+  { key: "settings", icon: User, path: "/barber/settings" },
 ] as const;
 
 export function BarberLayout({ children }: { children: ReactNode }) {
@@ -85,11 +85,6 @@ export function BarberLayout({ children }: { children: ReactNode }) {
               >
                 <div className="relative">
                   <Icon className={`${isActive ? "h-6 w-6" : "h-5 w-5"} transition-all`} strokeWidth={isActive ? 2.5 : 2} />
-                  {tab.key === "notifications" && unread > 0 && (
-                    <span className="absolute -top-1 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-white">
-                      {unread > 9 ? "9+" : unread}
-                    </span>
-                  )}
                 </div>
                 <span className={`text-[10px] font-medium ${isActive ? "font-semibold" : ""}`}>
                   {t(`barberApp.${tab.key}`)}

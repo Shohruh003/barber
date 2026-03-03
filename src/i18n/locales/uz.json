@@ -15,7 +15,8 @@
     "success": "Muvaffaqiyatli!",
     "currency": "so'm",
     "close": "Yopish",
-    "viewAll": "Hammasini ko'rish"
+    "viewAll": "Hammasini ko'rish",
+    "copied": "Nusxalandi"
   },
   "nav": {
     "home": "Bosh sahifa",
@@ -290,7 +291,7 @@
     "schedule": "Jadval",
     "myClients": "Mijozlarim",
     "notifications": "Bildirishnomalar",
-    "settings": "Sozlamalar",
+    "settings": "Profil",
     "availability": "Holat",
     "manualBooking": "Qo'lda yozish",
     "clientName": "Mijoz ismi",

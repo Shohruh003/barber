@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  User,
   Phone,
   Edit3,
   Check,
@@ -42,11 +41,12 @@ export default function CustomerSettingsScreen() {
   const [avatarPreview, setAvatarPreview] = useState("");
   const [showOldPass, setShowOldPass] = useState(false);
   const [showNewPass, setShowNewPass] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isDirty },
     reset,
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
@@ -62,10 +62,17 @@ export default function CustomerSettingsScreen() {
     if (user?.avatar) setAvatarUrl(user.avatar);
   }, [user]);
 
+  useEffect(() => {
+    if (!user) return;
+    if (editMode) return;
+    reset({ name: user.name, phone: user.phone, oldPassword: "", newPassword: "" });
+  }, [user, editMode, reset]);
+
   if (!user) return null;
 
   const onProfileSave = async (data: ProfileFormData) => {
     try {
+      setSaving(true);
       if (avatarFile) {
         await uploadAvatar(avatarFile);
         setAvatarFile(null);
@@ -84,6 +91,8 @@ export default function CustomerSettingsScreen() {
       toast.success(t("profile.profileUpdated"));
     } catch {
       toast.error("Xatolik yuz berdi");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -160,9 +169,14 @@ export default function CustomerSettingsScreen() {
               </div>
 
               <div className="flex gap-2 pt-1">
-                <Button type="submit" size="sm" className="flex-1 h-10">
+                <Button
+                  type="submit"
+                  size="sm"
+                  className="flex-1 h-10"
+                  disabled={saving || (!isDirty && !avatarFile)}
+                >
                   <Check className="h-4 w-4 mr-1" />
-                  {t("common.save")}
+                  {saving ? t("common.loading") : t("common.save")}
                 </Button>
                 <Button type="button" variant="outline" size="sm" className="h-10" onClick={() => { setEditMode(false); reset(); setAvatarFile(null); setAvatarPreview(""); setAvatarUrl(user.avatar || ""); }}>
                   {t("common.cancel")}
@@ -181,7 +195,16 @@ export default function CustomerSettingsScreen() {
                   <p className="text-xs text-muted-foreground flex items-center gap-1"><Phone className="h-3 w-3" />{user.phone}</p>
                 </div>
               </div>
-              <Button variant="outline" className="w-full h-10" onClick={() => setEditMode(true)}>
+              <Button
+                variant="outline"
+                className="w-full h-10"
+                onClick={() => {
+                  reset({ name: user.name, phone: user.phone, oldPassword: "", newPassword: "" });
+                  setAvatarFile(null);
+                  setAvatarPreview("");
+                  setEditMode(true);
+                }}
+              >
                 <Edit3 className="h-4 w-4 mr-2" />
                 {t("profile.editProfile")}
               </Button>

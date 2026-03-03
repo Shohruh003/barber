@@ -1,14 +1,10 @@
 import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
 import {
-  ArrowLeft,
   TrendingUp,
   Users,
   CalendarCheck,
   DollarSign,
-  Clock,
-  CalendarX,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,7 +15,6 @@ import { cn } from "@/lib/utils";
 
 export default function BarberStatsScreen() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { user } = useAuthStore();
   const { bookings, bookingsLoading, loadBarberBookings } = useBookingStore();
 
@@ -112,17 +107,6 @@ export default function BarberStatsScreen() {
 
   return (
     <div className="px-4 py-4 space-y-4 animate-fade-in">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <button
-          onClick={() => navigate("/barber/settings")}
-          className="flex h-9 w-9 items-center justify-center rounded-lg border"
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </button>
-        <h2 className="font-bold text-lg">{t("barberApp.statistics")}</h2>
-      </div>
-
       {/* Stats grid */}
       <div className="grid grid-cols-2 gap-3">
         {statCards.map((card) => (

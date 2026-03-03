@@ -343,27 +343,31 @@ export default function BarberScheduleScreen() {
 
       {/* Time Slots Grid */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-sm">{selectedDate}</h3>
-          <div className="flex items-center gap-2">
-            <Input
-              type="time"
-              value={newSlotTime}
-              onChange={(e) => setNewSlotTime(e.target.value)}
-              className="w-28 h-9"
-            />
-            <Button variant="outline" size="sm" onClick={handleAddSlot} className="h-9">
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Legend */}
-        <div className="flex gap-3 text-xs">
-          <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-green-500" />{t("barberPanel.available")}</span>
-          <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-blue-500" />{t("barberPanel.booked")}</span>
-          <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-red-500" />{t("barberPanel.blocked")}</span>
-        </div>
+        <Card>
+          <CardContent className="p-3 space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold">{selectedDate}</h3>
+              {/* Legend */}
+              <div className="flex gap-2.5 text-[10px] text-muted-foreground">
+                <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-green-500" />{t("barberPanel.available")}</span>
+                <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-blue-500" />{t("barberPanel.booked")}</span>
+                <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-red-500" />{t("barberPanel.blocked")}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Input
+                type="time"
+                value={newSlotTime}
+                onChange={(e) => setNewSlotTime(e.target.value)}
+                className="flex-1 h-10"
+              />
+              <Button size="sm" className="h-10 px-4" onClick={handleAddSlot}>
+                <Plus className="h-4 w-4 mr-1.5" />
+                {t("barberPanel.addSlot")}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {scheduleLoading ? (
           <PageLoader />

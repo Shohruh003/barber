@@ -72,8 +72,8 @@ export default function CustomerAIStyleScreen() {
   }, [previewUrl]);
 
   return (
-    <div className="min-h-full pb-24">
-      <div className="px-4 py-4 space-y-4">
+    <div className="h-full flex flex-col items-center justify-center px-4 pb-24">
+      <div className="w-full space-y-4">
         <p className="text-sm text-muted-foreground text-center">
           {t("aiStyle.subtitle")}
         </p>

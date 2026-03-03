@@ -5,7 +5,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Edit3,
   Check,
-  Mail,
   Phone,
   Shield,
   LogOut,
@@ -14,7 +13,6 @@ import {
   Pencil,
   ImagePlus,
   Camera,
-  Lock,
   Eye,
   EyeOff,
 } from "lucide-react";
@@ -22,12 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -58,15 +51,21 @@ export default function Profile() {
   const [avatarPreview, setAvatarPreview] = useState("");
   const [showOldPass, setShowOldPass] = useState(false);
   const [showNewPass, setShowNewPass] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isDirty },
     reset,
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
-    defaultValues: { name: user?.name, phone: user?.phone, oldPassword: "", newPassword: "" },
+    defaultValues: {
+      name: user?.name,
+      phone: user?.phone,
+      oldPassword: "",
+      newPassword: "",
+    },
   });
 
   useEffect(() => {
@@ -79,10 +78,22 @@ export default function Profile() {
     if (user?.avatar) setAvatarUrl(user.avatar);
   }, [user?.avatar]);
 
+  useEffect(() => {
+    if (!user) return;
+    if (editMode) return; // edit paytida user update bo'lsa, formni wipe qilmaymiz
+    reset({
+      name: user.name,
+      phone: user.phone,
+      oldPassword: "",
+      newPassword: "",
+    });
+  }, [user, editMode, reset]);
+
   if (!user) return <PageLoader />;
 
   const onProfileSave = async (data: ProfileFormData) => {
     try {
+      setSaving(true);
       // Upload avatar file first if selected
       if (avatarFile) {
         await uploadAvatar(avatarFile);
@@ -103,27 +114,40 @@ export default function Profile() {
       toast.success(t("profile.profileUpdated"));
     } catch {
       toast.error(t("profile.updateError") || "Xatolik yuz berdi");
+    } finally {
+      setSaving(false);
     }
   };
 
-  const roleLabel = user.role === "barber"
-    ? t("profile.roleBarber")
-    : user.role === "admin"
-      ? t("profile.roleAdmin")
-      : t("profile.roleUser");
+  const roleLabel =
+    user.role === "barber"
+      ? t("profile.roleBarber")
+      : user.role === "admin"
+        ? t("profile.roleAdmin")
+        : t("profile.roleUser");
 
   const isBarber = user.role === "barber";
 
   return (
-    <div className={`container py-8 animate-fade-in mx-auto ${isBarber ? "max-w-2xl" : "max-w-lg"}`}>
+    <div
+      className={`container py-8 animate-fade-in mx-auto ${isBarber ? "max-w-2xl" : "max-w-lg"}`}
+    >
       <h2 className="text-2xl font-bold mb-6">{t("profile.settings")}</h2>
 
       <Card>
         <CardHeader className="text-center">
           <div className="relative mx-auto w-fit">
             <Avatar className="h-24 w-24">
-              <AvatarImage src={avatarPreview || getAvatarUrl(avatarUrl) || getAvatarUrl(user.avatar)} />
-              <AvatarFallback className="text-3xl">{user.name[0]}</AvatarFallback>
+              <AvatarImage
+                src={
+                  avatarPreview ||
+                  getAvatarUrl(avatarUrl) ||
+                  getAvatarUrl(user.avatar)
+                }
+              />
+              <AvatarFallback className="text-3xl">
+                {user.name[0]}
+              </AvatarFallback>
             </Avatar>
             {editMode && (
               <label className="absolute bottom-0 right-0 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-foreground shadow hover:bg-primary/90 transition-colors">
@@ -173,23 +197,50 @@ export default function Profile() {
               </div>
 
               <Separator />
-              <p className="text-sm text-muted-foreground">{t("profile.changePassword") || "Parolni o'zgartirish (ixtiyoriy)"}</p>
+              <p className="text-sm text-muted-foreground">
+                {t("profile.changePassword") ||
+                  "Parolni o'zgartirish (ixtiyoriy)"}
+              </p>
 
               <div className="space-y-2">
                 <Label>{t("profile.oldPassword") || "Eski parol"}</Label>
                 <div className="relative">
-                  <Input type={showOldPass ? "text" : "password"} {...register("oldPassword")} placeholder="••••••" />
-                  <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground" onClick={() => setShowOldPass(!showOldPass)}>
-                    {showOldPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  <Input
+                    type={showOldPass ? "text" : "password"}
+                    {...register("oldPassword")}
+                    placeholder="••••••"
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    onClick={() => setShowOldPass(!showOldPass)}
+                  >
+                    {showOldPass ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
               </div>
               <div className="space-y-2">
                 <Label>{t("profile.newPassword") || "Yangi parol"}</Label>
                 <div className="relative">
-                  <Input type={showNewPass ? "text" : "password"} {...register("newPassword")} placeholder="••••••" />
-                  <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground" onClick={() => setShowNewPass(!showNewPass)}>
-                    {showNewPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  <Input
+                    type={showNewPass ? "text" : "password"}
+                    {...register("newPassword")}
+                    placeholder="••••••"
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    onClick={() => setShowNewPass(!showNewPass)}
+                  >
+                    {showNewPass ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
                 {errors.newPassword && (
@@ -200,9 +251,14 @@ export default function Profile() {
               </div>
 
               <div className="flex gap-2">
-                <Button type="submit" size="sm" className="flex-1">
+                <Button
+                  type="submit"
+                  size="sm"
+                  className="flex-1"
+                  disabled={saving || (!isDirty && !avatarFile)}
+                >
                   <Check className="h-4 w-4 mr-1" />
-                  {t("common.save")}
+                  {saving ? t("common.loading") : t("common.save")}
                 </Button>
                 <Button
                   type="button"
@@ -234,7 +290,18 @@ export default function Profile() {
               <Button
                 variant="outline"
                 className="w-full"
-                onClick={() => setEditMode(true)}
+                onClick={() => {
+                  // edit boshlanganida "dirty" false bo'lishi uchun formni current qiymatlar bilan reset qilamiz
+                  reset({
+                    name: user.name,
+                    phone: user.phone,
+                    oldPassword: "",
+                    newPassword: "",
+                  });
+                  setAvatarFile(null);
+                  setAvatarPreview("");
+                  setEditMode(true);
+                }}
               >
                 <Edit3 className="h-4 w-4 mr-2" />
                 {t("profile.editProfile")}
@@ -247,16 +314,17 @@ export default function Profile() {
       {/* Barber Professional Profile */}
       {isBarber && barber && (
         <div className="mt-6">
-          <h3 className="text-xl font-bold mb-4">{t("profile.barberProfile")}</h3>
-          <BarberProfileTabs barber={barber} updateBarberProfile={updateBarberProfile} />
+          <h3 className="text-xl font-bold mb-4">
+            {t("profile.barberProfile")}
+          </h3>
+          <BarberProfileTabs
+            barber={barber}
+            updateBarberProfile={updateBarberProfile}
+          />
         </div>
       )}
 
-      <Button
-        variant="destructive"
-        className="w-full mt-4"
-        onClick={logout}
-      >
+      <Button variant="destructive" className="w-full mt-4" onClick={logout}>
         <LogOut className="h-4 w-4 mr-2" />
         {t("nav.logout")}
       </Button>
@@ -271,7 +339,10 @@ function BarberProfileTabs({
   updateBarberProfile,
 }: {
   barber: Barber;
-  updateBarberProfile: (barberId: string, data: Partial<Omit<Barber, "id" | "rating" | "reviewCount">>) => Promise<void>;
+  updateBarberProfile: (
+    barberId: string,
+    data: Partial<Omit<Barber, "id" | "rating" | "reviewCount">>,
+  ) => Promise<void>;
 }) {
   const { t } = useTranslation();
 
@@ -284,11 +355,18 @@ function BarberProfileTabs({
       </TabsList>
 
       <TabsContent value="bio" className="mt-4">
-        <BioInfoTab barber={barber} updateBarberProfile={updateBarberProfile} />
+        <BioInfoTab
+          key={barber.id}
+          barber={barber}
+          updateBarberProfile={updateBarberProfile}
+        />
       </TabsContent>
 
       <TabsContent value="services" className="mt-4">
-        <ServicesTab barber={barber} updateBarberProfile={updateBarberProfile} />
+        <ServicesTab
+          barber={barber}
+          updateBarberProfile={updateBarberProfile}
+        />
       </TabsContent>
 
       <TabsContent value="gallery" className="mt-4">
@@ -305,7 +383,10 @@ function BioInfoTab({
   updateBarberProfile,
 }: {
   barber: Barber;
-  updateBarberProfile: (barberId: string, data: Partial<Omit<Barber, "id" | "rating" | "reviewCount">>) => Promise<void>;
+  updateBarberProfile: (
+    barberId: string,
+    data: Partial<Omit<Barber, "id" | "rating" | "reviewCount">>,
+  ) => Promise<void>;
 }) {
   const { t } = useTranslation();
   const [experience, setExperience] = useState(String(barber.experience));
@@ -315,10 +396,36 @@ function BioInfoTab({
   const [location, setLocation] = useState(barber.location);
   const [locationUz, setLocationUz] = useState(barber.locationUz);
   const [locationRu, setLocationRu] = useState(barber.locationRu);
-  const [instagram, setInstagram] = useState(barber.socialLinks?.instagram || "");
+  const [instagram, setInstagram] = useState(
+    barber.socialLinks?.instagram || "",
+  );
   const [telegram, setTelegram] = useState(barber.socialLinks?.telegram || "");
   const [facebook, setFacebook] = useState(barber.socialLinks?.facebook || "");
   const [saving, setSaving] = useState(false);
+  const [initial, setInitial] = useState(() => ({
+    experience: String(barber.experience ?? ""),
+    bio: barber.bio ?? "",
+    bioUz: barber.bioUz ?? "",
+    bioRu: barber.bioRu ?? "",
+    location: barber.location ?? "",
+    locationUz: barber.locationUz ?? "",
+    locationRu: barber.locationRu ?? "",
+    instagram: barber.socialLinks?.instagram || "",
+    telegram: barber.socialLinks?.telegram || "",
+    facebook: barber.socialLinks?.facebook || "",
+  }));
+
+  const hasChanges =
+    experience !== initial.experience ||
+    bio !== initial.bio ||
+    bioUz !== initial.bioUz ||
+    bioRu !== initial.bioRu ||
+    location !== initial.location ||
+    locationUz !== initial.locationUz ||
+    locationRu !== initial.locationRu ||
+    instagram !== initial.instagram ||
+    telegram !== initial.telegram ||
+    facebook !== initial.facebook;
 
   const handleSave = async () => {
     setSaving(true);
@@ -334,6 +441,18 @@ function BioInfoTab({
     });
     setSaving(false);
     toast.success(t("profile.profileSaved"));
+    setInitial({
+      experience,
+      bio,
+      bioUz,
+      bioRu,
+      location,
+      locationUz,
+      locationRu,
+      instagram,
+      telegram,
+      facebook,
+    });
   };
 
   return (
@@ -341,33 +460,58 @@ function BioInfoTab({
       <CardContent className="p-4 space-y-4">
         <div className="space-y-2">
           <Label>{t("profile.experience")}</Label>
-          <Input value={experience} onChange={(e) => setExperience(e.target.value)} placeholder="5, 8+, 10+" />
+          <Input
+            value={experience}
+            onChange={(e) => setExperience(e.target.value)}
+            placeholder="5, 8+, 10+"
+          />
         </div>
 
         <div className="space-y-2">
           <Label>{t("profile.bioUz")}</Label>
-          <Textarea value={bioUz} onChange={(e) => setBioUz(e.target.value)} rows={3} />
+          <Textarea
+            value={bioUz}
+            onChange={(e) => setBioUz(e.target.value)}
+            rows={3}
+          />
         </div>
         <div className="space-y-2">
           <Label>{t("profile.bioRu")}</Label>
-          <Textarea value={bioRu} onChange={(e) => setBioRu(e.target.value)} rows={3} />
+          <Textarea
+            value={bioRu}
+            onChange={(e) => setBioRu(e.target.value)}
+            rows={3}
+          />
         </div>
         <div className="space-y-2">
           <Label>{t("profile.bio")}</Label>
-          <Textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={3} />
+          <Textarea
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            rows={3}
+          />
         </div>
 
         <div className="space-y-2">
           <Label>{t("profile.locationUz")}</Label>
-          <Input value={locationUz} onChange={(e) => setLocationUz(e.target.value)} />
+          <Input
+            value={locationUz}
+            onChange={(e) => setLocationUz(e.target.value)}
+          />
         </div>
         <div className="space-y-2">
           <Label>{t("profile.locationRu")}</Label>
-          <Input value={locationRu} onChange={(e) => setLocationRu(e.target.value)} />
+          <Input
+            value={locationRu}
+            onChange={(e) => setLocationRu(e.target.value)}
+          />
         </div>
         <div className="space-y-2">
           <Label>{t("profile.location")}</Label>
-          <Input value={location} onChange={(e) => setLocation(e.target.value)} />
+          <Input
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+          />
         </div>
 
         <Separator />
@@ -376,26 +520,51 @@ function BioInfoTab({
         <div className="space-y-2">
           <Label>{t("profile.instagram")}</Label>
           <div className="flex">
-            <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 bg-muted text-muted-foreground text-sm">@</span>
-            <Input className="rounded-l-none" value={instagram} onChange={(e) => setInstagram(e.target.value)} placeholder="username" />
+            <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 bg-muted text-muted-foreground text-sm">
+              @
+            </span>
+            <Input
+              className="rounded-l-none"
+              value={instagram}
+              onChange={(e) => setInstagram(e.target.value)}
+              placeholder="username"
+            />
           </div>
         </div>
         <div className="space-y-2">
           <Label>{t("profile.telegram")}</Label>
           <div className="flex">
-            <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 bg-muted text-muted-foreground text-sm">@</span>
-            <Input className="rounded-l-none" value={telegram} onChange={(e) => setTelegram(e.target.value)} placeholder="username" />
+            <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 bg-muted text-muted-foreground text-sm">
+              @
+            </span>
+            <Input
+              className="rounded-l-none"
+              value={telegram}
+              onChange={(e) => setTelegram(e.target.value)}
+              placeholder="username"
+            />
           </div>
         </div>
         <div className="space-y-2">
           <Label>{t("profile.facebook")}</Label>
           <div className="flex">
-            <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 bg-muted text-muted-foreground text-sm">@</span>
-            <Input className="rounded-l-none" value={facebook} onChange={(e) => setFacebook(e.target.value)} placeholder="username" />
+            <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 bg-muted text-muted-foreground text-sm">
+              @
+            </span>
+            <Input
+              className="rounded-l-none"
+              value={facebook}
+              onChange={(e) => setFacebook(e.target.value)}
+              placeholder="username"
+            />
           </div>
         </div>
 
-        <Button className="w-full" onClick={handleSave} disabled={saving}>
+        <Button
+          className="w-full"
+          onClick={handleSave}
+          disabled={saving || !hasChanges}
+        >
           {saving ? t("common.loading") : t("common.save")}
         </Button>
       </CardContent>
@@ -422,7 +591,10 @@ function ServicesTab({
   updateBarberProfile,
 }: {
   barber: Barber;
-  updateBarberProfile: (barberId: string, data: Partial<Omit<Barber, "id" | "rating" | "reviewCount">>) => Promise<void>;
+  updateBarberProfile: (
+    barberId: string,
+    data: Partial<Omit<Barber, "id" | "rating" | "reviewCount">>,
+  ) => Promise<void>;
 }) {
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -487,16 +659,27 @@ function ServicesTab({
                 >
                   <span className="text-2xl">{service.icon}</span>
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-medium truncate">{service.nameUz || service.name}</h4>
+                    <h4 className="font-medium truncate">
+                      {service.nameUz || service.name}
+                    </h4>
                     <p className="text-sm text-muted-foreground">
-                      {service.duration} {t("booking.duration")} — {service.price.toLocaleString()} {t("common.currency")}
+                      {service.duration} {t("booking.duration")} —{" "}
+                      {service.price.toLocaleString()} {t("common.currency")}
                     </p>
                   </div>
                   <div className="flex gap-1 shrink-0">
-                    <Button variant="ghost" size="icon" onClick={() => openEdit(i)}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => openEdit(i)}
+                    >
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(i)}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDelete(i)}
+                    >
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   </div>
@@ -516,46 +699,91 @@ function ServicesTab({
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {editingIndex !== null ? t("profile.editService") : t("profile.addService")}
+              {editingIndex !== null
+                ? t("profile.editService")
+                : t("profile.addService")}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <div className="space-y-2">
               <Label>{t("profile.serviceIcon")}</Label>
-              <Input value={form.icon} onChange={(e) => setForm({ ...form, icon: e.target.value })} placeholder="✂️" />
+              <Input
+                value={form.icon}
+                onChange={(e) => setForm({ ...form, icon: e.target.value })}
+                placeholder="Emoji qo'ying"
+              />
             </div>
             <div className="space-y-2">
               <Label>{t("profile.serviceNameUz")}</Label>
-              <Input value={form.nameUz} onChange={(e) => setForm({ ...form, nameUz: e.target.value })} />
+              <Input
+                value={form.nameUz}
+                onChange={(e) => setForm({ ...form, nameUz: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label>{t("profile.serviceNameRu")}</Label>
-              <Input value={form.nameRu} onChange={(e) => setForm({ ...form, nameRu: e.target.value })} />
+              <Input
+                value={form.nameRu}
+                onChange={(e) => setForm({ ...form, nameRu: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label>{t("profile.serviceName")}</Label>
-              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              <Input
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label>{t("profile.serviceDescUz")}</Label>
-              <Textarea value={form.descriptionUz} onChange={(e) => setForm({ ...form, descriptionUz: e.target.value })} rows={2} />
+              <Textarea
+                value={form.descriptionUz}
+                onChange={(e) =>
+                  setForm({ ...form, descriptionUz: e.target.value })
+                }
+                rows={2}
+              />
             </div>
             <div className="space-y-2">
               <Label>{t("profile.serviceDescRu")}</Label>
-              <Textarea value={form.descriptionRu} onChange={(e) => setForm({ ...form, descriptionRu: e.target.value })} rows={2} />
+              <Textarea
+                value={form.descriptionRu}
+                onChange={(e) =>
+                  setForm({ ...form, descriptionRu: e.target.value })
+                }
+                rows={2}
+              />
             </div>
             <div className="space-y-2">
               <Label>{t("profile.serviceDesc")}</Label>
-              <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} />
+              <Textarea
+                value={form.description}
+                onChange={(e) =>
+                  setForm({ ...form, description: e.target.value })
+                }
+                rows={2}
+              />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label>{t("profile.servicePrice")}</Label>
-                <Input type="number" value={form.price} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} />
+                <Input
+                  type="number"
+                  value={form.price}
+                  onChange={(e) =>
+                    setForm({ ...form, price: Number(e.target.value) })
+                  }
+                />
               </div>
               <div className="space-y-2">
                 <Label>{t("profile.serviceDuration")}</Label>
-                <Input type="number" value={form.duration} onChange={(e) => setForm({ ...form, duration: Number(e.target.value) })} />
+                <Input
+                  type="number"
+                  value={form.duration}
+                  onChange={(e) =>
+                    setForm({ ...form, duration: Number(e.target.value) })
+                  }
+                />
               </div>
             </div>
           </div>
@@ -578,7 +806,10 @@ function GalleryTab({
   updateBarberProfile,
 }: {
   barber: Barber;
-  updateBarberProfile: (barberId: string, data: Partial<Omit<Barber, "id" | "rating" | "reviewCount">>) => Promise<void>;
+  updateBarberProfile: (
+    barberId: string,
+    data: Partial<Omit<Barber, "id" | "rating" | "reviewCount">>,
+  ) => Promise<void>;
 }) {
   const { t } = useTranslation();
 
@@ -606,7 +837,9 @@ function GalleryTab({
       <CardContent className="p-4 space-y-4">
         <label className="flex items-center justify-center gap-2 w-full cursor-pointer rounded-lg border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 py-8 transition-colors">
           <ImagePlus className="h-5 w-5 text-muted-foreground" />
-          <span className="text-sm font-medium text-muted-foreground">{t("profile.addImage")}</span>
+          <span className="text-sm font-medium text-muted-foreground">
+            {t("profile.addImage")}
+          </span>
           <input
             type="file"
             accept="image/*"
@@ -623,7 +856,10 @@ function GalleryTab({
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {barber.gallery.map((img, i) => (
-              <div key={i} className="relative group aspect-square rounded-lg overflow-hidden">
+              <div
+                key={i}
+                className="relative group aspect-square rounded-lg overflow-hidden"
+              >
                 <img
                   src={img}
                   alt={`Gallery ${i + 1}`}

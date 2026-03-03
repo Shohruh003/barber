@@ -28,7 +28,7 @@ export function ManualBookingDialog({
   barberId,
   selectedDate,
   selectedTime,
-  services,
+  services = [],
   onSuccess,
 }: ManualBookingDialogProps) {
   const { t, i18n } = useTranslation();

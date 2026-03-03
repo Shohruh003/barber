@@ -73,6 +73,16 @@ export default function CustomerBookingPage() {
     }
   }, [barberId, dates]);
 
+  // Auto-select today when entering step 2
+  useEffect(() => {
+    if (step === 2 && !selectedDate && scheduledDates.length > 0) {
+      const today = format(new Date(), "yyyy-MM-dd");
+      if (scheduledDates.includes(today)) {
+        setSelectedDate(today);
+      }
+    }
+  }, [step, selectedDate, scheduledDates, setSelectedDate]);
+
   useEffect(() => {
     if (barberId && selectedDate) {
       loadBookedSlots(barberId, selectedDate);

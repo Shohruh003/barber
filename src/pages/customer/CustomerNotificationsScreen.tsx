@@ -53,22 +53,22 @@ export default function CustomerNotificationsScreen() {
   return (
     <div className="animate-fade-in pb-4">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b px-4 py-2 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b px-4 py-2 flex items-center justify-between gap-2 overflow-hidden">
+        <div className="flex items-center gap-3 shrink-0">
           <button onClick={() => navigate(-1)} className="text-muted-foreground">
             <ArrowLeft className="h-5 w-5" />
           </button>
           <div className="flex items-center gap-2">
-            <h1 className="font-bold">{t("customerApp.notifications")}</h1>
+            <h1 className="font-bold text-sm">{t("customerApp.notifications")}</h1>
             {unreadCount > 0 && (
-              <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-bold text-primary-foreground">
+              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground">
                 {unreadCount}
               </span>
             )}
           </div>
         </div>
         {unreadCount > 0 && (
-          <Button variant="ghost" size="sm" className="text-xs h-8 gap-1" onClick={markAllRead}>
+          <Button variant="ghost" size="sm" className="text-[11px] h-8 gap-1 shrink-0 px-2" onClick={markAllRead}>
             <CheckCheck className="h-3.5 w-3.5" />
             {t("customerApp.markAllRead")}
           </Button>
@@ -110,7 +110,7 @@ export default function CustomerNotificationsScreen() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
                           <p className={cn("text-sm", !notif.isRead && "font-semibold")}>
-                            {notif.title}
+                            {notif.title.replace(/[\u{1F300}-\u{1F9FF}]/gu, "").trim()}
                           </p>
                           <span className="text-[10px] text-muted-foreground shrink-0">
                             {new Date(notif.createdAt).toLocaleTimeString("uz", {

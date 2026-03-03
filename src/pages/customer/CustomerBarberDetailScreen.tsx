@@ -103,10 +103,6 @@ export default function CustomerBarberDetailScreen() {
               </Badge>
             </div>
             <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              <MapPin className="h-3.5 w-3.5 shrink-0" />
-              <span className="truncate">{getLocation()}</span>
-            </div>
-            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
               <Clock className="h-3.5 w-3.5 shrink-0" />
               {barber.experience} {t("barbers.experience")}
             </div>
@@ -139,13 +135,114 @@ export default function CustomerBarberDetailScreen() {
 
       {/* Tabs */}
       <div className="px-4 mt-4">
-        <Tabs defaultValue="services">
+        <Tabs defaultValue="contact">
           <TabsList className="w-full">
+            <TabsTrigger value="contact" className="flex-1 text-xs">{t("footer.contact")}</TabsTrigger>
             <TabsTrigger value="services" className="flex-1 text-xs">{t("barbers.services")}</TabsTrigger>
             <TabsTrigger value="gallery" className="flex-1 text-xs">{t("barbers.gallery")}</TabsTrigger>
             <TabsTrigger value="reviews" className="flex-1 text-xs">{t("barbers.reviews")} ({reviews.length})</TabsTrigger>
-            <TabsTrigger value="contact" className="flex-1 text-xs">{t("footer.contact")}</TabsTrigger>
           </TabsList>
+
+          {/* Contact / Aloqa */}
+          <TabsContent value="contact" className="mt-3 space-y-3">
+            {/* Social + Phone */}
+            <Card>
+              <CardContent className="p-3 space-y-2.5">
+                {/* Phone */}
+                <a href={`tel:${barber.phone}`} className="flex items-center gap-3 text-sm">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-green-500/10 shrink-0">
+                    <Phone className="h-4 w-4 text-green-500" />
+                  </div>
+                  <span className="font-medium">{barber.phone}</span>
+                </a>
+                {/* Social Links */}
+                {barber.socialLinks?.instagram && (
+                  <a href={`https://instagram.com/${barber.socialLinks.instagram}`} target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-3 text-sm">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 shrink-0">
+                      <Instagram className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="font-medium">@{barber.socialLinks.instagram}</span>
+                  </a>
+                )}
+                {barber.socialLinks?.telegram && (
+                  <a href={`https://t.me/${barber.socialLinks.telegram}`} target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-3 text-sm">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#2AABEE]/10 shrink-0">
+                      <Send className="h-4 w-4 text-[#2AABEE]" />
+                    </div>
+                    <span className="font-medium">@{barber.socialLinks.telegram}</span>
+                  </a>
+                )}
+                {barber.socialLinks?.facebook && (
+                  <a href={`https://facebook.com/${barber.socialLinks.facebook}`} target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-3 text-sm">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1877F2]/10 shrink-0">
+                      <Facebook className="h-4 w-4 text-[#1877F2]" />
+                    </div>
+                    <span className="font-medium">{barber.socialLinks.facebook}</span>
+                  </a>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Working Hours */}
+            <Card>
+              <CardContent className="p-3 space-y-2">
+                <p className="font-semibold text-sm flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-primary" />
+                  {t("barbers.workingHours")}
+                </p>
+                {dayOrder.map((day) => {
+                  const schedule = barber.workingHours?.[day];
+                  return (
+                    <div key={day} className="flex items-center justify-between text-xs">
+                      <span className="capitalize text-muted-foreground">{t(`days.${day}`)}</span>
+                      {schedule?.isOpen ? (
+                        <span>{schedule.open} - {schedule.close}</span>
+                      ) : (
+                        <span className="text-muted-foreground">{t("booking.closed")}</span>
+                      )}
+                    </div>
+                  );
+                })}
+              </CardContent>
+            </Card>
+
+            {/* Location / Geo */}
+            <Card>
+              <CardContent className="p-3 space-y-3">
+                <div className="flex items-start gap-2">
+                  <MapPin className="h-4 w-4 mt-0.5 text-primary shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm">{barber.geoAddress || getLocation()}</p>
+                    {barber.latitude && barber.longitude && (
+                      <p className="text-[10px] text-muted-foreground mt-1 font-mono">
+                        {barber.latitude.toFixed(6)}, {barber.longitude.toFixed(6)}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {barber.latitude && barber.longitude && (
+                  <div className="flex gap-2">
+                    <Button variant="outline" className="flex-1 h-10 text-xs" onClick={openRoute}>
+                      <Navigation className="h-4 w-4 mr-1.5" />
+                      {t("customerApp.route")}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="flex-1 h-10 text-xs"
+                      onClick={() => navigate(`/customer/map?barber=${barber.id}`)}
+                    >
+                      <ExternalLink className="h-4 w-4 mr-1.5" />
+                      {t("customerApp.viewOnMap")}
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           {/* Services */}
           <TabsContent value="services" className="mt-3 space-y-2">
@@ -218,106 +315,6 @@ export default function CustomerBarberDetailScreen() {
                   </CardContent>
                 </Card>
               ))
-            )}
-          </TabsContent>
-
-          {/* Contact / Aloqa */}
-          <TabsContent value="contact" className="mt-3 space-y-3">
-            {/* Phone */}
-            <Card>
-              <CardContent className="p-3">
-                <a href={`tel:${barber.phone}`} className="flex items-center gap-3 text-sm">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-green-500/10">
-                    <Phone className="h-4 w-4 text-green-500" />
-                  </div>
-                  <span className="font-medium">{barber.phone}</span>
-                </a>
-              </CardContent>
-            </Card>
-
-            {/* Working Hours */}
-            <Card>
-              <CardContent className="p-3 space-y-2">
-                <p className="font-semibold text-sm flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-primary" />
-                  {t("barbers.workingHours")}
-                </p>
-                {dayOrder.map((day) => {
-                  const schedule = barber.workingHours?.[day];
-                  return (
-                    <div key={day} className="flex items-center justify-between text-xs">
-                      <span className="capitalize text-muted-foreground">{t(`days.${day}`)}</span>
-                      {schedule?.isOpen ? (
-                        <span>{schedule.open} - {schedule.close}</span>
-                      ) : (
-                        <span className="text-muted-foreground">{t("booking.closed")}</span>
-                      )}
-                    </div>
-                  );
-                })}
-              </CardContent>
-            </Card>
-
-            {/* Location / Geo */}
-            <Card>
-              <CardContent className="p-3 space-y-3">
-                <div className="flex items-start gap-2">
-                  <MapPin className="h-4 w-4 mt-0.5 text-primary shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm">{barber.geoAddress || getLocation()}</p>
-                    {barber.latitude && barber.longitude && (
-                      <p className="text-[10px] text-muted-foreground mt-1 font-mono">
-                        {barber.latitude.toFixed(6)}, {barber.longitude.toFixed(6)}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {barber.latitude && barber.longitude && (
-                  <div className="flex gap-2">
-                    <Button variant="outline" className="flex-1 h-10 text-xs" onClick={openRoute}>
-                      <Navigation className="h-4 w-4 mr-1.5" />
-                      {t("customerApp.route")}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="flex-1 h-10 text-xs"
-                      onClick={() => navigate(`/customer/map?barber=${barber.id}`)}
-                    >
-                      <ExternalLink className="h-4 w-4 mr-1.5" />
-                      {t("customerApp.viewOnMap")}
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Social Links */}
-            {barber.socialLinks && (barber.socialLinks.instagram || barber.socialLinks.telegram || barber.socialLinks.facebook) && (
-              <Card>
-                <CardContent className="p-3">
-                  <div className="flex items-center gap-3">
-                    {barber.socialLinks.instagram && (
-                      <a href={`https://instagram.com/${barber.socialLinks.instagram}`} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center justify-center h-10 w-10 rounded-full bg-accent hover:bg-primary/10 transition-colors">
-                        <Instagram className="h-5 w-5" />
-                      </a>
-                    )}
-                    {barber.socialLinks.telegram && (
-                      <a href={`https://t.me/${barber.socialLinks.telegram}`} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center justify-center h-10 w-10 rounded-full bg-accent hover:bg-primary/10 transition-colors">
-                        <Send className="h-5 w-5" />
-                      </a>
-                    )}
-                    {barber.socialLinks.facebook && (
-                      <a href={`https://facebook.com/${barber.socialLinks.facebook}`} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center justify-center h-10 w-10 rounded-full bg-accent hover:bg-primary/10 transition-colors">
-                        <Facebook className="h-5 w-5" />
-                      </a>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
             )}
           </TabsContent>
         </Tabs>

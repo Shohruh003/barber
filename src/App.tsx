@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-import { Suspense, lazy, useState } from "react";
+import { Suspense, lazy, useState, useEffect } from "react";
 import { Scissors } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { BarberLayout } from "@/components/BarberLayout";
@@ -59,15 +59,15 @@ function AuthHeader() {
 function AppRoutes() {
   const { user, token, loadUser } = useAuthStore();
 
-  const [initializing] = useState(() => {
-    if (token && !user) {
-      loadUser();
-      return true;
-    }
-    return false;
-  });
+  const [initializing, setInitializing] = useState(!!(token && !user));
 
-  if (initializing && !user) return <PageLoader />;
+  useEffect(() => {
+    if (token && !user) {
+      loadUser().finally(() => setInitializing(false));
+    }
+  }, [token, user, loadUser]);
+
+  if (initializing && token) return <PageLoader />;
 
   // Barber mobile layout
   if (user?.role === "barber") {

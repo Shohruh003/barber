@@ -75,11 +75,11 @@ export default function BarberProfileEditScreen() {
         </TabsList>
 
         <TabsContent value="bio" className="mt-4">
-          <BioInfoTab barber={barber} updateBarberProfile={updateBarberProfile} />
+          <BioInfoTab key={barber.id} barber={barber} updateBarberProfile={updateBarberProfile} />
         </TabsContent>
 
         <TabsContent value="hours" className="mt-4">
-          <WorkingHoursTab barber={barber} updateBarberProfile={updateBarberProfile} />
+          <WorkingHoursTab key={barber.id} barber={barber} updateBarberProfile={updateBarberProfile} />
         </TabsContent>
 
         <TabsContent value="services" className="mt-4">
@@ -118,6 +118,7 @@ function WorkingHoursTab({
 }) {
   const { t } = useTranslation();
   const [hours, setHours] = useState<WorkingHours>({ ...barber.workingHours });
+  const [initialHours, setInitialHours] = useState<WorkingHours>({ ...barber.workingHours });
   const [saving, setSaving] = useState(false);
 
   const updateDay = (day: keyof WorkingHours, field: keyof DaySchedule, value: string | boolean) => {
@@ -127,11 +128,26 @@ function WorkingHoursTab({
     }));
   };
 
+  const hoursEqual = (a: WorkingHours, b: WorkingHours) => {
+    return dayOrder.every((day) => {
+      const ad = a[day];
+      const bd = b[day];
+      return (
+        ad.isOpen === bd.isOpen &&
+        ad.open === bd.open &&
+        ad.close === bd.close
+      );
+    });
+  };
+
+  const hasChanges = !hoursEqual(hours, initialHours);
+
   const handleSave = async () => {
     setSaving(true);
     await updateBarberProfile(barber.id, { workingHours: hours });
     setSaving(false);
     toast.success(t("profile.profileSaved"));
+    setInitialHours(hours);
   };
 
   return (
@@ -179,7 +195,7 @@ function WorkingHoursTab({
           );
         })}
 
-        <Button className="w-full h-11" onClick={handleSave} disabled={saving}>
+        <Button className="w-full h-11" onClick={handleSave} disabled={saving || !hasChanges}>
           <Save className="h-4 w-4 mr-2" />
           {saving ? t("common.loading") : t("common.save")}
         </Button>
@@ -205,13 +221,28 @@ function BioInfoTab({
   const [bio, setBio] = useState(barber.bio);
   const [bioUz, setBioUz] = useState(barber.bioUz);
   const [bioRu, setBioRu] = useState(barber.bioRu);
-  const [location, setLocation] = useState(barber.location);
-  const [locationUz, setLocationUz] = useState(barber.locationUz);
-  const [locationRu, setLocationRu] = useState(barber.locationRu);
   const [instagram, setInstagram] = useState(barber.socialLinks?.instagram || "");
   const [telegram, setTelegram] = useState(barber.socialLinks?.telegram || "");
   const [facebook, setFacebook] = useState(barber.socialLinks?.facebook || "");
   const [saving, setSaving] = useState(false);
+  const [initial, setInitial] = useState(() => ({
+    experience: String(barber.experience ?? ""),
+    bio: barber.bio ?? "",
+    bioUz: barber.bioUz ?? "",
+    bioRu: barber.bioRu ?? "",
+    instagram: barber.socialLinks?.instagram || "",
+    telegram: barber.socialLinks?.telegram || "",
+    facebook: barber.socialLinks?.facebook || "",
+  }));
+
+  const hasChanges =
+    experience !== initial.experience ||
+    bio !== initial.bio ||
+    bioUz !== initial.bioUz ||
+    bioRu !== initial.bioRu ||
+    instagram !== initial.instagram ||
+    telegram !== initial.telegram ||
+    facebook !== initial.facebook;
 
   const handleSave = async () => {
     setSaving(true);
@@ -220,13 +251,19 @@ function BioInfoTab({
       bio,
       bioUz,
       bioRu,
-      location,
-      locationUz,
-      locationRu,
       socialLinks: { instagram, telegram, facebook },
     });
     setSaving(false);
     toast.success(t("profile.profileSaved"));
+    setInitial({
+      experience,
+      bio,
+      bioUz,
+      bioRu,
+      instagram,
+      telegram,
+      facebook,
+    });
   };
 
   return (
@@ -253,19 +290,6 @@ function BioInfoTab({
         <div className="space-y-1.5">
           <Label className="text-xs">{t("profile.bio")}</Label>
           <Textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={3} />
-        </div>
-
-        <div className="space-y-1.5">
-          <Label className="text-xs">{t("profile.locationUz")}</Label>
-          <Input value={locationUz} onChange={(e) => setLocationUz(e.target.value)} className="h-11" />
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-xs">{t("profile.locationRu")}</Label>
-          <Input value={locationRu} onChange={(e) => setLocationRu(e.target.value)} className="h-11" />
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-xs">{t("profile.location")}</Label>
-          <Input value={location} onChange={(e) => setLocation(e.target.value)} className="h-11" />
         </div>
 
         <Separator />
@@ -316,7 +340,7 @@ function BioInfoTab({
           </div>
         </div>
 
-        <Button className="w-full h-11" onClick={handleSave} disabled={saving}>
+        <Button className="w-full h-11" onClick={handleSave} disabled={saving || !hasChanges}>
           <Save className="h-4 w-4 mr-2" />
           {saving ? t("common.loading") : t("common.save")}
         </Button>
@@ -336,7 +360,7 @@ const emptyService: Omit<Service, "id"> = {
   descriptionRu: "",
   price: 0,
   duration: 30,
-  icon: "\u2702\uFE0F",
+  icon: "✂️",
 };
 
 function ServicesTab({
@@ -441,7 +465,7 @@ function ServicesTab({
 
       {/* Service Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto mx-4">
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {editingIndex !== null ? t("profile.editService") : t("profile.addService")}
@@ -453,7 +477,7 @@ function ServicesTab({
               <Input
                 value={form.icon}
                 onChange={(e) => setForm({ ...form, icon: e.target.value })}
-                placeholder="\u2702\uFE0F"
+                placeholder="Emoji qo'ying"
                 className="h-11"
               />
             </div>
