@@ -344,6 +344,7 @@
     "darkMode": "Dark",
     "lightMode": "Light",
     "logout": "Logout",
+    "support": "Support",
     "markAllRead": "Mark all read",
     "noNotifications": "No notifications",
     "noNotificationsHint": "New bookings will appear here",

@@ -7,6 +7,7 @@ import {
   Sun,
   LogOut,
   ChevronRight,
+  MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -106,6 +107,24 @@ export default function AdminSettingsScreen() {
               <ChevronRight className="h-4 w-4 text-muted-foreground" />
             </div>
           </button>
+        </CardContent>
+      </Card>
+
+      {/* Support */}
+      <Card>
+        <CardContent className="pt-4 pb-4">
+          <a
+            href="https://t.me/barberbook_support_bot"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full flex items-center justify-between"
+          >
+            <div className="flex items-center gap-2">
+              <MessageCircle className="h-5 w-5 text-blue-500" />
+              <span className="font-semibold text-sm">{t("barberApp.support")}</span>
+            </div>
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          </a>
         </CardContent>
       </Card>
 

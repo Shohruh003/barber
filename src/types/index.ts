@@ -80,6 +80,7 @@ export interface Booking {
   barberAvatar: string;
   userName: string;
   userAvatar: string;
+  userPhone?: string;
   guestName?: string;
   guestPhone?: string;
   isManual?: boolean;

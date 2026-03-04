@@ -136,7 +136,7 @@ export default function BarberClientsScreen() {
             const clientName = booking.isManual
               ? booking.guestName
               : booking.userName || t("barberApp.client");
-            const clientPhone = booking.isManual ? booking.guestPhone : "";
+            const clientPhone = booking.isManual ? booking.guestPhone : booking.userPhone || "";
 
             return (
               <Card key={booking.id}>

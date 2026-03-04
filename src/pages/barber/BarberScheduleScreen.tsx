@@ -444,8 +444,10 @@ export default function BarberScheduleScreen() {
                       <p className="font-medium text-sm">
                         {booking.isManual ? booking.guestName : booking.userName || t("barberApp.client")}
                       </p>
-                      {booking.isManual && booking.guestPhone && (
-                        <p className="text-[11px] text-muted-foreground">{booking.guestPhone}</p>
+                      {(booking.isManual ? booking.guestPhone : booking.userPhone) && (
+                        <p className="text-[11px] text-muted-foreground">
+                          {booking.isManual ? booking.guestPhone : booking.userPhone}
+                        </p>
                       )}
                     </div>
                   </div>
