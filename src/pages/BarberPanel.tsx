@@ -1,6 +1,9 @@
 import { useEffect, useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { format, addDays, startOfDay } from "date-fns";
+import { uz } from "date-fns/locale/uz";
+import { ru } from "date-fns/locale/ru";
+import { enUS } from "date-fns/locale/en-US";
 import {
   Calendar,
   Clock,
@@ -38,6 +41,7 @@ export default function BarberPanel() {
   const { t, i18n } = useTranslation();
   const { user } = useAuthStore();
   const lang = i18n.language as "en" | "uz" | "ru";
+  const dateFnsLocale = lang === "uz" ? uz : lang === "ru" ? ru : enUS;
   const {
     barber,
     barberLoading,
@@ -271,12 +275,12 @@ export default function BarberPanel() {
                       )}
                     >
                       <span className="text-xs font-medium">
-                        {format(date, "EEE")}
+                        {format(date, "EEE", { locale: dateFnsLocale })}
                       </span>
                       <span className="text-lg font-bold">
                         {format(date, "dd")}
                       </span>
-                      <span className="text-xs">{format(date, "MMM")}</span>
+                      <span className="text-xs">{format(date, "MMM", { locale: dateFnsLocale })}</span>
                     </button>
                   );
                 })}

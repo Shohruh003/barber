@@ -1,6 +1,9 @@
 import { useEffect, useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { format, addDays, startOfDay } from "date-fns";
+import { uz } from "date-fns/locale/uz";
+import { ru } from "date-fns/locale/ru";
+import { enUS } from "date-fns/locale/en-US";
 import {
   Clock,
   Plus,
@@ -36,6 +39,7 @@ export default function BarberScheduleScreen() {
   const { t, i18n } = useTranslation();
   const { user } = useAuthStore();
   const lang = i18n.language as "en" | "uz" | "ru";
+  const dateFnsLocale = lang === "uz" ? uz : lang === "ru" ? ru : enUS;
   const {
     barber,
     barberLoading,
@@ -257,9 +261,9 @@ export default function BarberScheduleScreen() {
                 isToday && !isSelected && "border-primary/40 opacity-100",
               )}
             >
-              <span className="text-[10px] font-medium uppercase">{format(date, "EEE")}</span>
+              <span className="text-[10px] font-medium uppercase">{format(date, "EEE", { locale: dateFnsLocale })}</span>
               <span className="text-lg font-bold">{format(date, "dd")}</span>
-              <span className="text-[10px]">{format(date, "MMM")}</span>
+              <span className="text-[10px]">{format(date, "MMM", { locale: dateFnsLocale })}</span>
             </button>
           );
         })}

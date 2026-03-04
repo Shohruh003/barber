@@ -2,6 +2,9 @@ import { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { format, addDays, startOfDay } from "date-fns";
+import { uz } from "date-fns/locale/uz";
+import { ru } from "date-fns/locale/ru";
+import { enUS } from "date-fns/locale/en-US";
 import {
   ArrowLeft,
   Calendar,
@@ -28,6 +31,7 @@ export default function BookingPage() {
   const { t, i18n } = useTranslation();
   const { user } = useAuthStore();
   const lang = i18n.language as "en" | "uz" | "ru";
+  const dateFnsLocale = lang === "uz" ? uz : lang === "ru" ? ru : enUS;
 
   const {
     selectedBarber,
@@ -306,13 +310,13 @@ export default function BookingPage() {
                         )}
                       >
                         <span className="text-xs font-medium">
-                          {format(date, "EEE")}
+                          {format(date, "EEE", { locale: dateFnsLocale })}
                         </span>
                         <span className="text-lg font-bold">
                           {format(date, "dd")}
                         </span>
                         <span className="text-xs">
-                          {format(date, "MMM")}
+                          {format(date, "MMM", { locale: dateFnsLocale })}
                         </span>
                       </button>
                     );
