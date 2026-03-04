@@ -82,7 +82,7 @@ export default function CustomerMapScreen() {
     });
 
     const zoomControl = new ymaps.control.ZoomControl({
-      options: { position: { right: 10, bottom: 200 } },
+      options: { position: { right: 10, top: 80 } },
     });
     map.controls.add(zoomControl);
 
@@ -144,8 +144,21 @@ export default function CustomerMapScreen() {
   }, [isLoaded, barbers, userLocation, searchParams, handleBarberSelect]);
 
   const centerOnUser = () => {
-    if (!mapRef.current || !userLocation) return;
-    mapRef.current.setCenter(userLocation, 14, { duration: 500 });
+    if (!mapRef.current) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
+        setUserLocation(coords);
+        mapRef.current?.setCenter(coords, 14, { duration: 500 });
+      },
+      () => {
+        // Fallback: use existing location if available
+        if (userLocation) {
+          mapRef.current?.setCenter(userLocation, 14, { duration: 500 });
+        }
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
+    );
   };
 
   const openRoute = (barber: Barber) => {
@@ -275,9 +288,6 @@ export default function CustomerMapScreen() {
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
                       <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                       <span>{barber.rating}</span>
-                      <span className="mx-1">·</span>
-                      <MapPin className="h-3 w-3" />
-                      <span className="truncate">{barber.location}</span>
                     </div>
                   </div>
                 </button>
