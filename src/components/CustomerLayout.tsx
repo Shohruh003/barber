@@ -42,6 +42,7 @@ export function CustomerLayout({ children }: { children: ReactNode }) {
 
   const unread = unreadCount;
   const isBarberDetail = location.pathname.startsWith("/customer/barber/");
+  const isMapPage = location.pathname === "/customer/map";
 
   return (
     <div className="flex flex-col h-[100dvh] bg-background">
@@ -69,7 +70,7 @@ export function CustomerLayout({ children }: { children: ReactNode }) {
       )}
 
       {/* Scrollable content */}
-      <main className="flex-1 overflow-y-auto pb-20">
+      <main className={`flex-1 overflow-y-auto ${isMapPage ? "" : "pb-20"}`}>
         <Suspense fallback={<PageLoader />}>
           {children}
         </Suspense>

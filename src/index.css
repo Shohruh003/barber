@@ -57,7 +57,9 @@
 
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -141,14 +143,22 @@ body {
   border-radius: 50%;
   background: hsl(var(--primary));
   border: 3px solid white;
-  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.3), 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow:
+    0 0 0 3px hsl(var(--primary) / 0.3),
+    0 2px 8px rgba(0, 0, 0, 0.3);
   animation: pulse-ring 2s infinite;
 }
 
 @keyframes pulse-ring {
-  0% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.4); }
-  70% { box-shadow: 0 0 0 10px hsl(var(--primary) / 0); }
-  100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0); }
+  0% {
+    box-shadow: 0 0 0 0 hsl(var(--primary) / 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px hsl(var(--primary) / 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 hsl(var(--primary) / 0);
+  }
 }
 
 /* Custom scrollbar */
@@ -177,4 +187,36 @@ body {
 .overflow-y-auto::-webkit-scrollbar-thumb:hover,
 .overflow-auto::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground) / 0.5);
+}
+
+.ymaps-2-1-79-gotoymaps__text {
+  display: none;
+}
+
+.ymaps-2-1-79-map-copyrights-promo {
+  display: none;
+}
+
+.ymaps-2-1-79-copyright__layout {
+  display: none;
+}
+
+.ymaps-2-1-79-copyright__agreement, .ymaps-2-1-79-copyright__text {
+  display: none;
+}
+
+.ymaps-2-1-79-copyright__logo-cell {
+  display: none;
+}
+
+.ymaps-2-1-79-copyright__logo {
+  display: none;
+}
+
+.ymaps-2-1-79-copyright__layout, .ymaps-2-1-79-copyright__wrap, .ymaps-2-1-79-copyright{
+  display: none;
+}
+
+.ymaps-2-1-79-copyright__logo {
+  display: none;
 }

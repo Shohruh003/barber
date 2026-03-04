@@ -10,6 +10,7 @@ import {
   X,
   Search,
   User,
+  ArrowLeft,
 } from "lucide-react";
 import { Drawer } from "vaul";
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
@@ -77,8 +78,13 @@ export default function CustomerMapScreen() {
     const map = new ymaps.Map(mapContainerRef.current, {
       center,
       zoom: focusBarber ? 15 : 12,
-      controls: ["zoomControl"],
+      controls: [],
     });
+
+    const zoomControl = new ymaps.control.ZoomControl({
+      options: { position: { right: 10, bottom: 200 } },
+    });
+    map.controls.add(zoomControl);
 
     const barbersWithLocation = barbers.filter((b) => b.latitude && b.longitude);
     barbersWithLocation.forEach((barber) => {
@@ -210,16 +216,24 @@ export default function CustomerMapScreen() {
         style={isDark ? { filter: "invert(1) hue-rotate(180deg)" } : undefined}
       />
 
-      {/* My location FAB */}
-      <button
-        onClick={centerOnUser}
-        className="absolute bottom-24 right-4 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-background border shadow-lg"
-      >
-        <Navigation className="h-5 w-5 text-primary" />
-      </button>
+      {/* Right-side FABs: location above, back below */}
+      <div className="fixed right-4 z-40 flex flex-col gap-3" style={{ bottom: "calc(4.5rem + env(safe-area-inset-bottom, 0px))" }}>
+        <button
+          onClick={centerOnUser}
+          className="flex h-11 w-11 items-center justify-center rounded-full bg-background border shadow-lg"
+        >
+          <Navigation className="h-5 w-5 text-primary" />
+        </button>
+        <button
+          onClick={() => navigate(-1)}
+          className="flex h-12 w-12 items-center justify-center rounded-full bg-background border shadow-lg hover:bg-accent transition-colors"
+        >
+          <ArrowLeft className="h-5 w-5 text-primary" />
+        </button>
+      </div>
 
       {/* Search bar */}
-      <div className="absolute top-3 left-3 right-3 z-10">
+      <div className="absolute top-3 left-3 right-3 z-40">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input

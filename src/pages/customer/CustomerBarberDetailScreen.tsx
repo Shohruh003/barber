@@ -75,13 +75,10 @@ export default function CustomerBarberDetailScreen() {
   };
 
   return (
+    <>
     <div className="animate-fade-in pb-4">
-      {/* Header with back + favorite */}
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b px-4 py-2 flex items-center justify-between">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-sm text-muted-foreground">
-          <ArrowLeft className="h-5 w-5" />
-          {t("common.back")}
-        </button>
+      {/* Header with favorite */}
+      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b px-4 py-2 flex items-center justify-end">
         <button onClick={() => toggleFavorite(barber.id)} className="flex items-center justify-center h-9 w-9">
           <Heart className={cn("h-6 w-6 transition-all", isFav ? "fill-red-500 text-red-500" : "text-muted-foreground")} />
         </button>
@@ -313,5 +310,15 @@ export default function CustomerBarberDetailScreen() {
         </Tabs>
       </div>
     </div>
+
+    {/* Floating back button — outside animate-fade-in */}
+    <button
+      onClick={() => navigate(-1)}
+      className="fixed right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-background border shadow-lg hover:bg-accent transition-colors"
+      style={{ bottom: "calc(4.5rem + env(safe-area-inset-bottom, 0px))" }}
+    >
+      <ArrowLeft className="h-5 w-5 text-primary" />
+    </button>
+    </>
   );
 }

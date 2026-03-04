@@ -92,6 +92,7 @@ export default function CustomerBarbersScreen() {
   ];
 
   return (
+    <>
     <div className="animate-fade-in">
       {/* Sticky search + filters */}
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b px-4 py-3 space-y-3">
@@ -285,14 +286,17 @@ export default function CustomerBarbersScreen() {
         )}
       </div>
 
-      {/* Floating map button */}
-      <button
-        onClick={() => navigate("/customer/map")}
-        className="fixed bottom-20 right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors"
-        aria-label={t("customerApp.viewOnMap")}
-      >
-        <MapPin className="h-5 w-5" />
-      </button>
     </div>
+
+    {/* Floating map button — outside animate-fade-in */}
+    <button
+      onClick={() => navigate("/customer/map")}
+      className="fixed right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-background border shadow-lg hover:bg-accent transition-colors"
+      style={{ bottom: "calc(4.5rem + env(safe-area-inset-bottom, 0px))" }}
+      aria-label={t("customerApp.viewOnMap")}
+    >
+      <MapPin className="h-5 w-5 text-primary" />
+    </button>
+    </>
   );
 }
