@@ -5,7 +5,6 @@ import {
   Star,
   MapPin,
   Clock,
-  Phone,
   ArrowLeft,
   Calendar,
   Instagram,
@@ -300,14 +299,6 @@ export default function BarberDetail() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <a
-                href={`tel:${barber.phone}`}
-                className="flex items-center gap-2 text-sm hover:text-primary transition-colors"
-              >
-                <Phone className="h-4 w-4" />
-                {barber.phone}
-              </a>
-              <Separator />
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4" />
                 {getLocation()}

@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import {
   Search,
   Star,
-  Phone,
   Clock,
   Heart,
   Scissors,
@@ -231,11 +230,6 @@ export default function CustomerBarbersScreen() {
                             </div>
                           </>
                         )}
-
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Phone className="h-3 w-3 shrink-0" />
-                          <span className="truncate">{barber.phone}</span>
-                        </div>
 
                         {isSingle && (
                           <div className="flex items-center gap-1 text-xs text-muted-foreground">
