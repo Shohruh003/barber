@@ -184,7 +184,6 @@
     "resendIn": "Qayta yuborish:",
     "seconds": "soniya",
     "resendCode": "Kodni qayta yuborish",
-    "smsRateLimit": "1 soatda 3 tadan ko'p SMS yuborib bo'lmaydi. Keyinroq urinib ko'ring",
     "forgotPasswordTitle": "Parolni tiklash",
     "forgotPasswordSub": "Telefon raqamingizni kiriting",
     "sendCode": "Kod yuborish",

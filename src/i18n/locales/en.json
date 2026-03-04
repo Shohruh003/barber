@@ -184,7 +184,6 @@
     "resendIn": "Resend in:",
     "seconds": "sec",
     "resendCode": "Resend code",
-    "smsRateLimit": "Cannot send more than 3 SMS per hour. Try again later",
     "forgotPasswordTitle": "Reset Password",
     "forgotPasswordSub": "Enter your phone number",
     "sendCode": "Send Code",
