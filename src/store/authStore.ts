@@ -67,6 +67,16 @@ export const useAuthStore = create<AuthState>()(
       logout: () => {
         set({ user: null, token: null });
         localStorage.clear();
+        sessionStorage.clear();
+        // Clear service worker & browser caches
+        if ("caches" in window) {
+          caches.keys().then((names) => names.forEach((name) => caches.delete(name)));
+        }
+        if ("serviceWorker" in navigator) {
+          navigator.serviceWorker.getRegistrations().then((regs) =>
+            regs.forEach((reg) => reg.unregister()),
+          );
+        }
       },
 
       updateUser: async (data) => {
