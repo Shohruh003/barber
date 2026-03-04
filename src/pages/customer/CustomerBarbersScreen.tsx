@@ -157,10 +157,10 @@ export default function CustomerBarbersScreen() {
               return (
                 <Card
                   key={barber.id}
-                  className="overflow-hidden cursor-pointer hover:shadow-lg transition-all"
+                  className="overflow-hidden cursor-pointer hover:shadow-lg transition-all flex flex-col"
                   onClick={() => navigate(`/customer/barber/${barber.id}`)}
                 >
-                  <CardContent className="p-0">
+                  <CardContent className="p-0 flex flex-col flex-1">
                     {/* Top photo strip */}
                     <div className={cn(
                       "relative bg-gradient-to-br from-primary/20 to-primary/5 overflow-hidden",
@@ -198,7 +198,7 @@ export default function CustomerBarbersScreen() {
                     </div>
 
                     <div className={cn(
-                      "relative",
+                      "relative flex-1 flex flex-col",
                       isSingle ? "p-3 -mt-8" : "p-2.5 -mt-6"
                     )}>
                       {/* Avatar */}
@@ -210,7 +210,7 @@ export default function CustomerBarbersScreen() {
                         <AvatarFallback className={isSingle ? "text-lg" : "text-sm"}>{barber.name[0]}</AvatarFallback>
                       </Avatar>
 
-                      <div className={cn("space-y-1", isSingle ? "mt-2" : "mt-1.5")}>
+                      <div className={cn("space-y-1 flex-1 flex flex-col", isSingle ? "mt-2" : "mt-1.5")}>
                         {isSingle ? (
                           <div className="flex items-start justify-between">
                             <h3 className="font-semibold text-base">{barber.name}</h3>
@@ -243,7 +243,7 @@ export default function CustomerBarbersScreen() {
                         )}
 
                         {/* Actions */}
-                        <div className={cn("pt-1.5", isSingle ? "flex gap-2" : "")}>
+                        <div className={cn("pt-1.5 mt-auto", isSingle ? "flex gap-2" : "")}>
                           {barber.isAvailable ? (
                             <Button
                               className={cn("h-8 text-xs", isSingle ? "flex-1 h-9" : "w-full")}
