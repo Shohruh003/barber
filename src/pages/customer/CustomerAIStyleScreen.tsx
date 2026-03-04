@@ -46,16 +46,27 @@ export default function CustomerAIStyleScreen() {
   const handleDownload = async () => {
     if (!generatedImage) return;
     try {
-      const response = await fetch(generatedImage);
-      const blob = await response.blob();
+      const res = await fetch(generatedImage);
+      const blob = await res.blob();
       const url = URL.createObjectURL(blob);
+
+      // Try standard download first (works on web browsers)
       const a = document.createElement("a");
       a.href = url;
       a.download = `my-style-${Date.now()}.png`;
+      document.body.appendChild(a);
       a.click();
-      URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch {
-      toast.error(t("aiStyle.error"));
+      // WebView fallback: open image so user can long-press to save
+      const w = window.open("", "_blank");
+      if (w) {
+        w.document.write(`<img src="${generatedImage}" style="width:100%;height:auto;" />`);
+        w.document.title = "Save image";
+      } else {
+        toast.error(t("aiStyle.error"));
+      }
     }
   };
 
