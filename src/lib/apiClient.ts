@@ -185,11 +185,12 @@ export async function fetchBarbers(params?: FetchBarbersParams): Promise<Paginat
     query.set("favoriteIds", params.favoriteIds.join(","));
   }
   const qs = query.toString();
-  const raw = await api<{ data: Record<string, any>[]; meta: any }>(`/barbers${qs ? `?${qs}` : ""}`);
-  return {
-    data: raw.data.map(transformBarber),
-    meta: raw.meta,
-  };
+  const raw = await api<any>(`/barbers${qs ? `?${qs}` : ""}`);
+  // Support both paginated { data, meta } and legacy array response
+  if (Array.isArray(raw)) {
+    return { data: raw.map(transformBarber), meta: { page: 1, limit: raw.length, total: raw.length, totalPages: 1, hasMore: false } };
+  }
+  return { data: (raw.data || []).map(transformBarber), meta: raw.meta };
 }
 
 export async function fetchBarberById(id: string): Promise<Barber | null> {
@@ -213,13 +214,19 @@ export interface PaginatedBookings {
 }
 
 export async function fetchUserBookings(userId: string, page = 1, limit = 20): Promise<PaginatedBookings> {
-  const raw = await api<{ data: Record<string, any>[]; meta: any }>(`/bookings/user/${userId}?page=${page}&limit=${limit}`);
-  return { data: raw.data.map(transformBooking), meta: raw.meta };
+  const raw = await api<any>(`/bookings/user/${userId}?page=${page}&limit=${limit}`);
+  if (Array.isArray(raw)) {
+    return { data: raw.map(transformBooking), meta: { page: 1, limit: raw.length, total: raw.length, totalPages: 1, hasMore: false } };
+  }
+  return { data: (raw.data || []).map(transformBooking), meta: raw.meta };
 }
 
 export async function fetchBarberBookings(barberId: string, page = 1, limit = 20): Promise<PaginatedBookings> {
-  const raw = await api<{ data: Record<string, any>[]; meta: any }>(`/bookings/barber/${barberId}?page=${page}&limit=${limit}`);
-  return { data: raw.data.map(transformBooking), meta: raw.meta };
+  const raw = await api<any>(`/bookings/barber/${barberId}?page=${page}&limit=${limit}`);
+  if (Array.isArray(raw)) {
+    return { data: raw.map(transformBooking), meta: { page: 1, limit: raw.length, total: raw.length, totalPages: 1, hasMore: false } };
+  }
+  return { data: (raw.data || []).map(transformBooking), meta: raw.meta };
 }
 
 export async function fetchAllBookings(): Promise<Booking[]> {

@@ -19,7 +19,7 @@ export default function BarberStatsScreen() {
   const { bookings, bookingsLoading, loadBarberBookings } = useBookingStore();
 
   useEffect(() => {
-    if (user?.id) loadBarberBookings(user.id);
+    if (user?.id) loadBarberBookings(user.id).catch(() => {});
   }, [user?.id, loadBarberBookings]);
 
   // loadBarberBookings already filters by barberId, so no need to filter again

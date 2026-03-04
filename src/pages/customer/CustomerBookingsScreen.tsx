@@ -50,7 +50,7 @@ export default function CustomerBookingsScreen() {
   const observerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (user?.id) loadUserBookings(user.id).then(() => setInitialLoad(false));
+    if (user?.id) loadUserBookings(user.id).catch(() => {}).finally(() => setInitialLoad(false));
   }, [user, loadUserBookings]);
 
   // Infinite scroll

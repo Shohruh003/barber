@@ -33,7 +33,7 @@ export default function BarberClientsScreen() {
   const observerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (user?.id) loadBarberBookings(user.id).then(() => setInitialLoad(false));
+    if (user?.id) loadBarberBookings(user.id).catch(() => {}).finally(() => setInitialLoad(false));
   }, [user?.id, loadBarberBookings]);
 
   // Infinite scroll

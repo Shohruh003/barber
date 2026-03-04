@@ -74,9 +74,9 @@ export default function Bookings() {
   useEffect(() => {
     if (!user) return;
     if (user.role === "barber") {
-      loadBarberBookings(user.id);
+      loadBarberBookings(user.id).catch(() => {});
     } else {
-      loadUserBookings(user.id);
+      loadUserBookings(user.id).catch(() => {});
     }
   }, [user, loadUserBookings, loadBarberBookings]);
 

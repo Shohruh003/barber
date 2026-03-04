@@ -69,7 +69,7 @@ export default function BarberDashboard() {
 
   useEffect(() => {
     if (user) {
-      loadBarberBookings(user.id);
+      loadBarberBookings(user.id).catch(() => {});
     }
   }, [user, loadBarberBookings]);
 

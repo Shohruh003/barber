@@ -81,7 +81,7 @@ export default function BarberScheduleScreen() {
   useEffect(() => {
     if (user) {
       loadBarber(user.id);
-      loadBarberBookings(user.id);
+      loadBarberBookings(user.id).catch(() => {});
     }
   }, [user, loadBarber, loadBarberBookings]);
 

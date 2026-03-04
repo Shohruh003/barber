@@ -51,7 +51,7 @@ export default function CustomerBarbersScreen() {
     if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
 
     const doLoad = () => {
-      loadBarbers(getParams()).then(() => setInitialLoad(false));
+      loadBarbers(getParams()).catch(() => {}).finally(() => setInitialLoad(false));
     };
 
     // Debounce search, instant for filter/sort
