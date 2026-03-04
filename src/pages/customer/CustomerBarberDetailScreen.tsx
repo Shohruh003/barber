@@ -77,13 +77,6 @@ export default function CustomerBarberDetailScreen() {
   return (
     <>
     <div className="animate-fade-in pb-4">
-      {/* Header with favorite */}
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b px-4 py-2 flex items-center justify-end">
-        <button onClick={() => toggleFavorite(barber.id)} className="flex items-center justify-center h-9 w-9">
-          <Heart className={cn("h-6 w-6 transition-all", isFav ? "fill-red-500 text-red-500" : "text-muted-foreground")} />
-        </button>
-      </div>
-
       {/* Profile header */}
       <div className="px-4 pt-4 space-y-4">
         <div className="flex items-start gap-4">
@@ -94,6 +87,9 @@ export default function CustomerBarberDetailScreen() {
           <div className="flex-1 min-w-0 space-y-1.5">
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-bold truncate">{barber.name}</h1>
+              <button onClick={() => toggleFavorite(barber.id)} className="flex items-center justify-center h-8 w-8 shrink-0 ml-auto">
+                <Heart className={cn("h-5 w-5 transition-all", isFav ? "fill-red-500 text-red-500" : "text-muted-foreground")} />
+              </button>
               <Badge variant={barber.isAvailable ? "success" : "secondary"} className="shrink-0 text-[10px]">
                 {barber.isAvailable ? t("barbers.available") : t("barbers.unavailable")}
               </Badge>

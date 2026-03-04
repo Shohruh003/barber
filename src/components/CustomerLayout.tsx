@@ -41,14 +41,12 @@ export function CustomerLayout({ children }: { children: ReactNode }) {
   }, [user?.id, loadFavoriteIds, loadNotifications]);
 
   const unread = unreadCount;
-  const isBarberDetail = location.pathname.startsWith("/customer/barber/");
   const isMapPage = location.pathname === "/customer/map";
 
   return (
     <div className="flex flex-col h-[100dvh] bg-background">
       {/* Header with notification bell (hidden on barber detail page) */}
-      {!isBarberDetail && (
-        <header className="flex items-center justify-between px-4 py-3 border-b bg-background/95 backdrop-blur safe-area-top shrink-0">
+      <header className="flex items-center justify-between px-4 py-3 border-b bg-background/95 backdrop-blur safe-area-top shrink-0">
           <div className="flex items-center gap-2 font-bold text-xl">
             <Scissors className="h-6 w-6 text-primary" />
             <span className="bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
@@ -67,7 +65,6 @@ export function CustomerLayout({ children }: { children: ReactNode }) {
             )}
           </button>
         </header>
-      )}
 
       {/* Scrollable content */}
       <main className={`flex-1 overflow-y-auto ${isMapPage ? "" : "pb-20"}`}>

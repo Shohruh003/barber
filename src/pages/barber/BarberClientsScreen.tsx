@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Search,
@@ -8,6 +8,7 @@ import {
   Clock,
   CheckCircle,
   XCircle,
+  Loader2,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -25,13 +26,31 @@ export default function BarberClientsScreen() {
   const { t, i18n } = useTranslation();
   const lang = i18n.language as "en" | "uz" | "ru";
   const { user } = useAuthStore();
-  const { bookings, bookingsLoading, loadBarberBookings } = useBookingStore();
+  const { bookings, bookingsLoading, bookingsHasMore, loadBarberBookings, loadMoreBarberBookings } = useBookingStore();
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<StatusTab>("confirmed");
+  const [initialLoad, setInitialLoad] = useState(true);
+  const observerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (user?.id) loadBarberBookings(user.id);
+    if (user?.id) loadBarberBookings(user.id).then(() => setInitialLoad(false));
   }, [user?.id, loadBarberBookings]);
+
+  // Infinite scroll
+  useEffect(() => {
+    const el = observerRef.current;
+    if (!el || !user?.id) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && bookingsHasMore && !bookingsLoading) {
+          loadMoreBarberBookings(user.id);
+        }
+      },
+      { threshold: 0.1 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [bookingsHasMore, bookingsLoading, loadMoreBarberBookings, user?.id]);
 
   const filteredByStatus = useMemo(
     () => bookings.filter((b) => b.status === activeTab),
@@ -84,7 +103,7 @@ export default function BarberClientsScreen() {
     },
   ];
 
-  if (bookingsLoading) return <PageLoader />;
+  if (initialLoad && bookingsLoading) return <PageLoader />;
 
   return (
     <div className="px-4 py-4 space-y-4 animate-fade-in">
@@ -211,6 +230,13 @@ export default function BarberClientsScreen() {
           })}
         </div>
       )}
+
+      {/* Infinite scroll trigger */}
+      <div ref={observerRef} className="py-4 flex justify-center">
+        {bookingsLoading && !initialLoad && (
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        )}
+      </div>
     </div>
   );
 }

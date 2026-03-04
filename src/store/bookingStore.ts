@@ -16,12 +16,16 @@ import {
   createNotification,
   createReview,
 } from "@/lib/apiClient";
+import type { FetchBarbersParams } from "@/lib/apiClient";
 
 interface BookingState {
   // Barbers
   barbers: Barber[];
   selectedBarber: Barber | null;
   barbersLoading: boolean;
+  barbersPage: number;
+  barbersHasMore: boolean;
+  barbersTotal: number;
 
   // Booking flow - multi-service
   selectedServices: Service[];
@@ -33,9 +37,12 @@ interface BookingState {
   // Bookings list
   bookings: Booking[];
   bookingsLoading: boolean;
+  bookingsPage: number;
+  bookingsHasMore: boolean;
 
   // Actions - Barbers
-  loadBarbers: () => Promise<void>;
+  loadBarbers: (params?: FetchBarbersParams) => Promise<void>;
+  loadMoreBarbers: (params?: FetchBarbersParams) => Promise<void>;
   loadBarberById: (id: string) => Promise<void>;
   searchBarbersList: (query: string) => Promise<void>;
 
@@ -60,7 +67,9 @@ interface BookingState {
 
   // Actions - Bookings list
   loadUserBookings: (userId: string) => Promise<void>;
+  loadMoreUserBookings: (userId: string) => Promise<void>;
   loadBarberBookings: (barberId: string) => Promise<void>;
+  loadMoreBarberBookings: (barberId: string) => Promise<void>;
   loadAllBookings: () => Promise<void>;
   cancelUserBooking: (bookingId: string) => Promise<void>;
 
@@ -79,6 +88,9 @@ export const useBookingStore = create<BookingState>()((set, get) => ({
   barbers: [],
   selectedBarber: null,
   barbersLoading: false,
+  barbersPage: 1,
+  barbersHasMore: true,
+  barbersTotal: 0,
 
   selectedServices: [],
   selectedDate: null,
@@ -88,11 +100,34 @@ export const useBookingStore = create<BookingState>()((set, get) => ({
 
   bookings: [],
   bookingsLoading: false,
+  bookingsPage: 1,
+  bookingsHasMore: true,
 
-  loadBarbers: async () => {
+  loadBarbers: async (params) => {
     set({ barbersLoading: true });
-    const barbers = await fetchBarbers();
-    set({ barbers, barbersLoading: false });
+    const result = await fetchBarbers({ ...params, page: 1 });
+    set({
+      barbers: result.data,
+      barbersLoading: false,
+      barbersPage: 1,
+      barbersHasMore: result.meta.hasMore,
+      barbersTotal: result.meta.total,
+    });
+  },
+
+  loadMoreBarbers: async (params) => {
+    const { barbersPage, barbersHasMore, barbersLoading } = get();
+    if (!barbersHasMore || barbersLoading) return;
+    set({ barbersLoading: true });
+    const nextPage = barbersPage + 1;
+    const result = await fetchBarbers({ ...params, page: nextPage });
+    set((state) => ({
+      barbers: [...state.barbers, ...result.data],
+      barbersLoading: false,
+      barbersPage: nextPage,
+      barbersHasMore: result.meta.hasMore,
+      barbersTotal: result.meta.total,
+    }));
   },
 
   loadBarberById: async (id) => {
@@ -177,14 +212,42 @@ export const useBookingStore = create<BookingState>()((set, get) => ({
 
   loadUserBookings: async (userId) => {
     set({ bookingsLoading: true });
-    const bookings = await fetchUserBookings(userId);
-    set({ bookings, bookingsLoading: false });
+    const result = await fetchUserBookings(userId, 1);
+    set({ bookings: result.data, bookingsLoading: false, bookingsPage: 1, bookingsHasMore: result.meta.hasMore });
+  },
+
+  loadMoreUserBookings: async (userId) => {
+    const { bookingsPage, bookingsHasMore, bookingsLoading } = get();
+    if (!bookingsHasMore || bookingsLoading) return;
+    set({ bookingsLoading: true });
+    const nextPage = bookingsPage + 1;
+    const result = await fetchUserBookings(userId, nextPage);
+    set((state) => ({
+      bookings: [...state.bookings, ...result.data],
+      bookingsLoading: false,
+      bookingsPage: nextPage,
+      bookingsHasMore: result.meta.hasMore,
+    }));
   },
 
   loadBarberBookings: async (barberId) => {
     set({ bookingsLoading: true });
-    const bookings = await fetchBarberBookings(barberId);
-    set({ bookings, bookingsLoading: false });
+    const result = await fetchBarberBookings(barberId, 1);
+    set({ bookings: result.data, bookingsLoading: false, bookingsPage: 1, bookingsHasMore: result.meta.hasMore });
+  },
+
+  loadMoreBarberBookings: async (barberId) => {
+    const { bookingsPage, bookingsHasMore, bookingsLoading } = get();
+    if (!bookingsHasMore || bookingsLoading) return;
+    set({ bookingsLoading: true });
+    const nextPage = bookingsPage + 1;
+    const result = await fetchBarberBookings(barberId, nextPage);
+    set((state) => ({
+      bookings: [...state.bookings, ...result.data],
+      bookingsLoading: false,
+      bookingsPage: nextPage,
+      bookingsHasMore: result.meta.hasMore,
+    }));
   },
 
   loadAllBookings: async () => {

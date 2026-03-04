@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
   CalendarDays,
   X,
   Star,
   CheckCircle2,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -32,7 +33,9 @@ export default function CustomerBookingsScreen() {
   const {
     bookings,
     bookingsLoading,
+    bookingsHasMore,
     loadUserBookings,
+    loadMoreUserBookings,
     cancelUserBooking,
     completeBookingUser,
   } = useBookingStore();
@@ -43,12 +46,30 @@ export default function CustomerBookingsScreen() {
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewComment, setReviewComment] = useState("");
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
+  const observerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (user?.id) loadUserBookings(user.id);
+    if (user?.id) loadUserBookings(user.id).then(() => setInitialLoad(false));
   }, [user, loadUserBookings]);
 
-  if (!user || bookingsLoading) return <PageLoader />;
+  // Infinite scroll
+  useEffect(() => {
+    const el = observerRef.current;
+    if (!el || !user?.id) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && bookingsHasMore && !bookingsLoading) {
+          loadMoreUserBookings(user.id);
+        }
+      },
+      { threshold: 0.1 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [bookingsHasMore, bookingsLoading, loadMoreUserBookings, user?.id]);
+
+  if (!user || (initialLoad && bookingsLoading)) return <PageLoader />;
 
   const upcomingBookings = bookings.filter((b) => b.status === "confirmed");
   const pastBookings = bookings.filter((b) => b.status === "completed");
@@ -207,6 +228,13 @@ export default function CustomerBookingsScreen() {
           </TabsContent>
         ))}
       </Tabs>
+
+      {/* Infinite scroll trigger */}
+      <div ref={observerRef} className="py-4 flex justify-center">
+        {bookingsLoading && !initialLoad && (
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        )}
+      </div>
 
       {/* Cancel Dialog */}
       <Dialog open={!!cancelId} onOpenChange={() => setCancelId(null)}>

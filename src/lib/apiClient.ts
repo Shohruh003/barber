@@ -160,9 +160,36 @@ export async function resetPasswordAPI(phone: string, password: string): Promise
 }
 
 // ---------- BARBERS ----------
-export async function fetchBarbers(): Promise<Barber[]> {
-  const raw = await api<Record<string, any>[]>("/barbers");
-  return raw.map(transformBarber);
+export interface FetchBarbersParams {
+  page?: number;
+  limit?: number;
+  sort?: "rating" | "experience" | "price";
+  filter?: "all" | "available" | "favorites";
+  search?: string;
+  favoriteIds?: string[];
+}
+
+export interface PaginatedBarbers {
+  data: Barber[];
+  meta: { page: number; limit: number; total: number; totalPages: number; hasMore: boolean };
+}
+
+export async function fetchBarbers(params?: FetchBarbersParams): Promise<PaginatedBarbers> {
+  const query = new URLSearchParams();
+  if (params?.page) query.set("page", String(params.page));
+  if (params?.limit) query.set("limit", String(params.limit));
+  if (params?.sort) query.set("sort", params.sort);
+  if (params?.filter && params.filter !== "all") query.set("filter", params.filter);
+  if (params?.search) query.set("search", params.search);
+  if (params?.filter === "favorites" && params?.favoriteIds?.length) {
+    query.set("favoriteIds", params.favoriteIds.join(","));
+  }
+  const qs = query.toString();
+  const raw = await api<{ data: Record<string, any>[]; meta: any }>(`/barbers${qs ? `?${qs}` : ""}`);
+  return {
+    data: raw.data.map(transformBarber),
+    meta: raw.meta,
+  };
 }
 
 export async function fetchBarberById(id: string): Promise<Barber | null> {
@@ -180,14 +207,19 @@ export async function searchBarbers(query: string): Promise<Barber[]> {
 }
 
 // ---------- BOOKINGS ----------
-export async function fetchUserBookings(userId: string): Promise<Booking[]> {
-  const raw = await api<Record<string, any>[]>(`/bookings/user/${userId}`);
-  return raw.map(transformBooking);
+export interface PaginatedBookings {
+  data: Booking[];
+  meta: { page: number; limit: number; total: number; totalPages: number; hasMore: boolean };
 }
 
-export async function fetchBarberBookings(barberId: string): Promise<Booking[]> {
-  const raw = await api<Record<string, any>[]>(`/bookings/barber/${barberId}`);
-  return raw.map(transformBooking);
+export async function fetchUserBookings(userId: string, page = 1, limit = 20): Promise<PaginatedBookings> {
+  const raw = await api<{ data: Record<string, any>[]; meta: any }>(`/bookings/user/${userId}?page=${page}&limit=${limit}`);
+  return { data: raw.data.map(transformBooking), meta: raw.meta };
+}
+
+export async function fetchBarberBookings(barberId: string, page = 1, limit = 20): Promise<PaginatedBookings> {
+  const raw = await api<{ data: Record<string, any>[]; meta: any }>(`/bookings/barber/${barberId}?page=${page}&limit=${limit}`);
+  return { data: raw.data.map(transformBooking), meta: raw.meta };
 }
 
 export async function fetchAllBookings(): Promise<Booking[]> {
@@ -240,8 +272,13 @@ export async function createManualBooking(data: {
   return transformBooking(raw);
 }
 
-export async function fetchBarberClients(barberId: string): Promise<BarberClient[]> {
-  return api(`/bookings/barber/${barberId}/clients`);
+export interface PaginatedClients {
+  data: BarberClient[];
+  meta: { page: number; limit: number; total: number; totalPages: number; hasMore: boolean };
+}
+
+export async function fetchBarberClients(barberId: string, page = 1, limit = 20): Promise<PaginatedClients> {
+  return api(`/bookings/barber/${barberId}/clients?page=${page}&limit=${limit}`);
 }
 
 export async function cancelBooking(bookingId: string): Promise<boolean> {

@@ -122,10 +122,18 @@ export default function BookingPage() {
 
     // Only show slots that the barber has explicitly set
     if (customDaySlots && customDaySlots.length > 0) {
-      return customDaySlots.map((time) => ({
-        time,
-        available: !bookedSlots.includes(time),
-      }));
+      const isToday = selectedDate === format(new Date(), "yyyy-MM-dd");
+      const now = new Date();
+      const nowMinutes = now.getHours() * 60 + now.getMinutes();
+      return customDaySlots.map((time) => {
+        const [h, m] = time.split(":").map(Number);
+        const slotMinutes = h * 60 + m;
+        const isPast = isToday && slotMinutes <= nowMinutes;
+        return {
+          time,
+          available: !bookedSlots.includes(time) && !isPast,
+        };
+      });
     }
 
     // No custom slots = barber hasn't set schedule for this date

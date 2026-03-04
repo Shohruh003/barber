@@ -24,7 +24,7 @@ export default function Home() {
   const lang = i18n.language as "en" | "uz" | "ru";
 
   useEffect(() => {
-    loadBarbers();
+    loadBarbers({ limit: 1000 });
   }, [loadBarbers]);
 
   // Derive unique popular services from all barbers

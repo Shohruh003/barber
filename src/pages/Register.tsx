@@ -98,7 +98,7 @@ export default function Register() {
         role: data.role,
       });
       setStep("otp");
-      setCountdown(60);
+      setCountdown(120);
       toast.success(t("auth.codeSent"));
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : t("common.error");
@@ -134,7 +134,7 @@ export default function Register() {
     try {
       await sendRegistrationCodeAPI(registrationData.phone);
       recordSmsAttempt();
-      setCountdown(60);
+      setCountdown(120);
       setOtpValue("");
       toast.success(t("auth.codeSent"));
     } catch (err: unknown) {

@@ -27,7 +27,7 @@ export default function BarbersList() {
     if (q) {
       searchBarbersList(q);
     } else {
-      loadBarbers();
+      loadBarbers({ limit: 1000 });
     }
   }, [searchParams, loadBarbers, searchBarbersList]);
 
@@ -35,7 +35,7 @@ export default function BarbersList() {
     if (query.trim()) {
       searchBarbersList(query);
     } else {
-      loadBarbers();
+      loadBarbers({ limit: 1000 });
     }
   };
 

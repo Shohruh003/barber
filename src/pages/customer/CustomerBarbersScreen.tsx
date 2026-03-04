@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -9,6 +9,7 @@ import {
   Scissors,
   Calendar,
   MapPin,
+  Loader2,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -27,19 +28,62 @@ type FilterKey = "all" | "favorites" | "available";
 export default function CustomerBarbersScreen() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { barbers, barbersLoading, loadBarbers } = useBookingStore();
+  const { barbers, barbersLoading, barbersHasMore, loadBarbers, loadMoreBarbers } = useBookingStore();
   const { favoriteIds, toggleFavorite } = useFavoritesStore();
   const lang = i18n.language as "en" | "uz" | "ru";
 
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterKey>("all");
   const [sort, setSort] = useState<SortKey>("rating");
+  const [initialLoad, setInitialLoad] = useState(true);
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const observerRef = useRef<HTMLDivElement>(null);
 
+  const getParams = useCallback(() => ({
+    sort,
+    filter,
+    search: search.trim() || undefined,
+    favoriteIds: filter === "favorites" ? Array.from(favoriteIds) : undefined,
+  }), [sort, filter, search, favoriteIds]);
+
+  // Initial load + reload on filter/sort/search change
   useEffect(() => {
-    loadBarbers();
-  }, [loadBarbers]);
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
 
-  if (barbersLoading) return <PageLoader />;
+    const doLoad = () => {
+      loadBarbers(getParams()).then(() => setInitialLoad(false));
+    };
+
+    // Debounce search, instant for filter/sort
+    if (search.trim()) {
+      searchTimerRef.current = setTimeout(doLoad, 400);
+    } else {
+      doLoad();
+    }
+
+    return () => {
+      if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    };
+  }, [sort, filter, search, loadBarbers, getParams]);
+
+  // Infinite scroll observer
+  useEffect(() => {
+    const el = observerRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && barbersHasMore && !barbersLoading) {
+          loadMoreBarbers(getParams());
+        }
+      },
+      { threshold: 0.1 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [barbersHasMore, barbersLoading, loadMoreBarbers, getParams]);
+
+  if (initialLoad && barbersLoading) return <PageLoader />;
 
   const getLocation = (b: Barber) => {
     if (lang === "uz") return b.locationUz;
@@ -52,32 +96,6 @@ export default function CustomerBarbersScreen() {
     if (lang === "ru") return b.bioRu;
     return b.bio;
   };
-
-  const getServiceName = (s: { name: string; nameUz: string; nameRu: string }) => {
-    if (lang === "uz") return s.nameUz;
-    if (lang === "ru") return s.nameRu;
-    return s.name;
-  };
-
-  const getMinPrice = (b: Barber) => {
-    if (b.services.length === 0) return 0;
-    return Math.min(...b.services.map((s) => s.price));
-  };
-
-  let filtered = barbers.filter((b) => {
-    const q = search.toLowerCase();
-    if (q && !b.name.toLowerCase().includes(q) && !getLocation(b).toLowerCase().includes(q)) return false;
-    if (filter === "favorites" && !favoriteIds.has(b.id)) return false;
-    if (filter === "available" && !b.isAvailable) return false;
-    return true;
-  });
-
-  filtered = [...filtered].sort((a, b) => {
-    if (sort === "rating") return b.rating - a.rating;
-    if (sort === "experience") return Number(b.experience) - Number(a.experience);
-    if (sort === "price") return getMinPrice(a) - getMinPrice(b);
-    return 0;
-  });
 
   const filters: { key: FilterKey; label: string }[] = [
     { key: "all", label: t("customerApp.allBarbers") },
@@ -141,7 +159,7 @@ export default function CustomerBarbersScreen() {
 
       {/* Barber cards */}
       <div className="px-4 py-3">
-        {filtered.length === 0 ? (
+        {barbers.length === 0 && !barbersLoading ? (
           <div className="text-center py-16">
             <Scissors className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
             <p className="text-sm text-muted-foreground">
@@ -151,10 +169,10 @@ export default function CustomerBarbersScreen() {
         ) : (
           <div className={cn(
             "grid gap-3",
-            filtered.length === 1 ? "grid-cols-1" : "grid-cols-2"
+            barbers.length === 1 ? "grid-cols-1" : "grid-cols-2"
           )}>
-            {filtered.map((barber) => {
-              const isSingle = filtered.length === 1;
+            {barbers.map((barber) => {
+              const isSingle = barbers.length === 1;
               return (
                 <Card
                   key={barber.id}
@@ -284,6 +302,13 @@ export default function CustomerBarbersScreen() {
             })}
           </div>
         )}
+
+        {/* Infinite scroll trigger + loading */}
+        <div ref={observerRef} className="py-4 flex justify-center">
+          {barbersLoading && !initialLoad && (
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          )}
+        </div>
       </div>
 
     </div>

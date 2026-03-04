@@ -41,7 +41,7 @@ export default function CustomerMapScreen() {
   const placemarksRef = useRef<Map<string, any>>(new Map());
 
   useEffect(() => {
-    loadBarbers();
+    loadBarbers({ limit: 1000 });
   }, [loadBarbers]);
 
   useEffect(() => {

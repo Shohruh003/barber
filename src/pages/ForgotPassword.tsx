@@ -55,7 +55,7 @@ export default function ForgotPassword() {
       await sendResetCodeAPI(rawPhone);
       setPhone(rawPhone);
       setStep("otp");
-      setCountdown(60);
+      setCountdown(120);
       toast.success(t("auth.codeSent"));
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : t("common.error");
@@ -99,7 +99,7 @@ export default function ForgotPassword() {
     if (countdown > 0) return;
     try {
       await sendResetCodeAPI(phone);
-      setCountdown(60);
+      setCountdown(120);
       setOtpValue("");
       toast.success(t("auth.codeSent"));
     } catch (err: unknown) {
