@@ -36,7 +36,7 @@ export default function CustomerBarbersScreen() {
   const [filter, setFilter] = useState<FilterKey>("all");
   const [sort, setSort] = useState<SortKey>("rating");
   const [initialLoad, setInitialLoad] = useState(true);
-  const searchTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const observerRef = useRef<HTMLDivElement>(null);
 
   const getParams = useCallback(() => ({
