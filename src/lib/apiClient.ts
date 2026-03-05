@@ -103,6 +103,13 @@ export async function loginAPI(
   return result;
 }
 
+export async function registerDeviceAPI(fcmToken: string): Promise<void> {
+  await api("/auth/register-device", {
+    method: "POST",
+    body: JSON.stringify({ fcmToken }),
+  });
+}
+
 export async function fetchMeAPI(): Promise<User> {
   const user = await api<User>("/auth/me");
   if (user.avatar) user.avatar = getAvatarUrl(user.avatar);

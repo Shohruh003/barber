@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { User } from "@/types";
-import { loginAPI, registerAPI, fetchMeAPI, updateProfile, uploadAvatar } from "@/lib/apiClient";
+import { loginAPI, registerAPI, fetchMeAPI, updateProfile, uploadAvatar, registerDeviceAPI } from "@/lib/apiClient";
 
 interface AuthState {
   user: User | null;
@@ -36,6 +36,11 @@ export const useAuthStore = create<AuthState>()(
         try {
           const { user, token } = await loginAPI(phone, password);
           set({ user, token, isLoading: false });
+          // Register FCM token for push notifications
+          try {
+            const fcmToken = (window as any).Android?.getFcmToken?.();
+            if (fcmToken) registerDeviceAPI(fcmToken);
+          } catch {}
         } catch (err) {
           set({ error: "Telefon raqam yoki parol noto'g'ri", isLoading: false });
           throw err;
@@ -47,6 +52,11 @@ export const useAuthStore = create<AuthState>()(
         try {
           const { user, token } = await registerAPI(data);
           set({ user, token, isLoading: false });
+          // Register FCM token for push notifications
+          try {
+            const fcmToken = (window as any).Android?.getFcmToken?.();
+            if (fcmToken) registerDeviceAPI(fcmToken);
+          } catch {}
         } catch (err) {
           set({ error: "Ro'yxatdan o'tishda xatolik", isLoading: false });
           throw err;
