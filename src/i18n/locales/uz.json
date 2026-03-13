@@ -118,6 +118,8 @@
     "avatar": "Profil rasmi",
     "avatarUrl": "Rasm URL manzili",
     "experience": "Tajriba (yil)",
+    "targetGender": "Kimlar uchun xizmat",
+    "targetAll": "Hammasi",
     "bio": "Haqida (EN)",
     "bioUz": "Haqida (UZ)",
     "bioRu": "Haqida (RU)",
@@ -191,7 +193,10 @@
     "newPasswordSub": "Yangi parolingizni kiriting",
     "resetPassword": "Parolni o'zgartirish",
     "passwordReset": "Parol muvaffaqiyatli o'zgartirildi",
-    "backToLogin": "Kirishga qaytish"
+    "backToLogin": "Kirishga qaytish",
+    "gender": "Jinsingiz (ixtiyoriy)",
+    "genderMale": "Erkak",
+    "genderFemale": "Ayol"
   },
   "admin": {
     "title": "Admin paneli",

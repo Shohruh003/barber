@@ -4,6 +4,7 @@ export interface User {
   phone: string;
   avatar?: string;
   role: "user" | "admin" | "barber";
+  gender?: "MALE" | "FEMALE";
   password?: string;
   createdAt: string;
 }
@@ -39,6 +40,7 @@ export interface Barber {
   workingHours: WorkingHours;
   gallery: string[];
   isAvailable: boolean;
+  targetGender?: "MALE" | "FEMALE" | "ALL";
   slotDuration: number; // minutes (default 30)
   latitude?: number;
   longitude?: number;

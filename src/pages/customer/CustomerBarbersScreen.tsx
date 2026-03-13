@@ -35,6 +35,7 @@ export default function CustomerBarbersScreen() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterKey>("all");
   const [sort, setSort] = useState<SortKey>("rating");
+  const [genderFilter, setGenderFilter] = useState<"ALL" | "MALE" | "FEMALE">("ALL");
   const [initialLoad, setInitialLoad] = useState(true);
   const searchTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const observerRef = useRef<HTMLDivElement>(null);
@@ -44,7 +45,8 @@ export default function CustomerBarbersScreen() {
     filter,
     search: search.trim() || undefined,
     favoriteIds: filter === "favorites" ? Array.from(favoriteIds) : undefined,
-  }), [sort, filter, search, favoriteIds]);
+    gender: genderFilter !== "ALL" ? genderFilter : undefined,
+  }), [sort, filter, search, favoriteIds, genderFilter]);
 
   // Initial load + reload on filter/sort/search change
   useEffect(() => {
@@ -152,6 +154,21 @@ export default function CustomerBarbersScreen() {
               )}
             >
               {s.label}
+            </button>
+          ))}
+          <div className="w-px bg-border shrink-0 mx-1" />
+          {(["ALL", "MALE", "FEMALE"] as const).map((g) => (
+            <button
+              key={g}
+              onClick={() => setGenderFilter(g)}
+              className={cn(
+                "shrink-0 rounded-full px-3 py-1.5 text-xs font-medium border transition-all",
+                genderFilter === g
+                  ? "border-pink-500 bg-pink-500/10 text-pink-500"
+                  : "border-border hover:border-pink-500/50",
+              )}
+            >
+              {g === "ALL" ? `👥 ${t("profile.targetAll")}` : g === "MALE" ? `👨 ${t("auth.genderMale")}` : `👩 ${t("auth.genderFemale")}`}
             </button>
           ))}
         </div>

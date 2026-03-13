@@ -56,6 +56,7 @@ function transformBarber(raw: Record<string, any>): Barber {
     longitude: raw.longitude ?? undefined,
     geoAddress: raw.geoAddress ?? undefined,
     reminderDays: raw.reminderDays ?? 14,
+    targetGender: raw.targetGender ?? "ALL",
     socialLinks: {
       instagram: raw.instagram || undefined,
       telegram: raw.telegram || undefined,
@@ -121,6 +122,7 @@ export async function registerAPI(data: {
   phone: string;
   password: string;
   role: "user" | "barber";
+  gender?: "MALE" | "FEMALE";
 }): Promise<{ user: User; token: string }> {
   const result = await api<{ user: User; token: string }>("/auth/register", {
     method: "POST",
@@ -174,6 +176,7 @@ export interface FetchBarbersParams {
   filter?: "all" | "available" | "favorites";
   search?: string;
   favoriteIds?: string[];
+  gender?: "MALE" | "FEMALE";
 }
 
 export interface PaginatedBarbers {
@@ -191,6 +194,7 @@ export async function fetchBarbers(params?: FetchBarbersParams): Promise<Paginat
   if (params?.filter === "favorites" && params?.favoriteIds?.length) {
     query.set("favoriteIds", params.favoriteIds.join(","));
   }
+  if (params?.gender) query.set("gender", params.gender);
   const qs = query.toString();
   const raw = await api<any>(`/barbers${qs ? `?${qs}` : ""}`);
   // Support both paginated { data, meta } and legacy array response

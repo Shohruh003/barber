@@ -28,12 +28,14 @@ export default function Register() {
   const navigate = useNavigate();
   const { register: registerUser, isLoading } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
+  const [gender, setGender] = useState<"MALE" | "FEMALE" | null>(null);
   const [step, setStep] = useState<"form" | "otp">("form");
   const [registrationData, setRegistrationData] = useState<{
     name: string;
     phone: string;
     password: string;
     role: "user" | "barber";
+    gender?: "MALE" | "FEMALE";
   } | null>(null);
   const [otpValue, setOtpValue] = useState("");
   const [countdown, setCountdown] = useState(0);
@@ -71,6 +73,7 @@ export default function Register() {
         phone: rawPhone,
         password: data.password,
         role: data.role,
+        gender: gender ?? undefined,
       });
       setStep("otp");
       setCountdown(120);
@@ -217,6 +220,33 @@ export default function Register() {
                 </button>
               </div>
             </div>
+
+            {/* Gender selector — only for customers */}
+            {selectedRole === "user" && (
+              <div className="space-y-2">
+                <Label>{t("auth.gender")}</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  {(["MALE", "FEMALE"] as const).map((g) => (
+                    <button
+                      key={g}
+                      type="button"
+                      onClick={() => setGender(g)}
+                      className={cn(
+                        "flex flex-col items-center gap-1.5 rounded-lg border-2 p-3 transition-all",
+                        gender === g
+                          ? "border-primary bg-primary/5"
+                          : "border-muted hover:border-muted-foreground/30",
+                      )}
+                    >
+                      <span className="text-2xl">{g === "MALE" ? "👨" : "👩"}</span>
+                      <span className={cn("text-sm font-medium", gender === g ? "text-primary" : "text-muted-foreground")}>
+                        {g === "MALE" ? t("auth.genderMale") : t("auth.genderFemale")}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="name">{t("auth.name")}</Label>

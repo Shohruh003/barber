@@ -15,6 +15,7 @@ interface AuthState {
     phone: string;
     password: string;
     role: "user" | "barber";
+    gender?: "MALE" | "FEMALE";
   }) => Promise<void>;
   loadUser: () => Promise<void>;
   logout: () => void;

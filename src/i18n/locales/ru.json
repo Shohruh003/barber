@@ -118,6 +118,8 @@
     "avatar": "Фото профиля",
     "avatarUrl": "URL изображения",
     "experience": "Опыт (лет)",
+    "targetGender": "Для кого услуги",
+    "targetAll": "Все",
     "bio": "О себе (EN)",
     "bioUz": "О себе (UZ)",
     "bioRu": "О себе (RU)",
@@ -191,7 +193,10 @@
     "newPasswordSub": "Введите новый пароль",
     "resetPassword": "Сменить пароль",
     "passwordReset": "Пароль успешно изменён",
-    "backToLogin": "Вернуться ко входу"
+    "backToLogin": "Вернуться ко входу",
+    "gender": "Ваш пол",
+    "genderMale": "Мужчина",
+    "genderFemale": "Женщина"
   },
   "admin": {
     "title": "Панель администратора",

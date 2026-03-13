@@ -118,6 +118,8 @@
     "avatar": "Profile Picture",
     "avatarUrl": "Image URL",
     "experience": "Experience (years)",
+    "targetGender": "Service target",
+    "targetAll": "Everyone",
     "bio": "About (EN)",
     "bioUz": "About (UZ)",
     "bioRu": "About (RU)",
@@ -191,7 +193,10 @@
     "newPasswordSub": "Enter your new password",
     "resetPassword": "Reset Password",
     "passwordReset": "Password successfully changed",
-    "backToLogin": "Back to login"
+    "backToLogin": "Back to login",
+    "gender": "Your gender",
+    "genderMale": "Male",
+    "genderFemale": "Female"
   },
   "admin": {
     "title": "Admin Dashboard",

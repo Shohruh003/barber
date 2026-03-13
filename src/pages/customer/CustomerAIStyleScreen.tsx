@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { generateAiStyle, fetchMyBalance } from "@/lib/apiClient";
+import { useAuthStore } from "@/store/authStore";
 import toast from "react-hot-toast";
 
 const TELEGRAM_BOT_URL = "https://t.me/barberbook_support_bot";
@@ -18,6 +19,7 @@ const AI_COST = 1000;
 
 export default function CustomerAIStyleScreen() {
   const { t } = useTranslation();
+  const { user } = useAuthStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -104,9 +106,16 @@ export default function CustomerAIStyleScreen() {
         </p>
 
         {/* Bepul limit haqida ma'lumot */}
-        <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
-          <Sparkles className="h-3.5 w-3.5 text-primary" />
-          <span>Kunlik <span className="font-semibold text-foreground">{AI_FREE_DAILY} ta</span> bepul · Keyingisi <span className="font-semibold text-foreground">{AI_COST.toLocaleString()} so'm</span></span>
+        <div className="flex flex-col items-center gap-1 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1.5">
+            <Sparkles className="h-3.5 w-3.5 text-primary" />
+            <span>Kunlik <span className="font-semibold text-foreground">{AI_FREE_DAILY} ta</span> bepul · Keyingisi <span className="font-semibold text-foreground">{AI_COST.toLocaleString()} so'm</span></span>
+          </div>
+          {user?.gender && (
+            <span className="text-muted-foreground">
+              {user.gender === "FEMALE" ? "👩 Ayollar soch turmagi generatsiya qilinadi" : "👨 Erkaklar soch turmagi generatsiya qilinadi"}
+            </span>
+          )}
         </div>
 
         <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">

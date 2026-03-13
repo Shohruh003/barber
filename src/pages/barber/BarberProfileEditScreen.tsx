@@ -29,6 +29,7 @@ import { PageLoader } from "@/components/LoadingSpinner";
 import { useAuthStore } from "@/store/authStore";
 import { useBarberScheduleStore } from "@/store/barberScheduleStore";
 import type { Service, Barber, WorkingHours, DaySchedule } from "@/types";
+import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 
 export default function BarberProfileEditScreen() {
@@ -221,6 +222,7 @@ function BioInfoTab({
   const [bio, setBio] = useState(barber.bio);
   const [bioUz, setBioUz] = useState(barber.bioUz);
   const [bioRu, setBioRu] = useState(barber.bioRu);
+  const [targetGender, setTargetGender] = useState<"MALE" | "FEMALE" | "ALL">(barber.targetGender ?? "ALL");
   const [instagram, setInstagram] = useState(barber.socialLinks?.instagram || "");
   const [telegram, setTelegram] = useState(barber.socialLinks?.telegram || "");
   const [facebook, setFacebook] = useState(barber.socialLinks?.facebook || "");
@@ -230,6 +232,7 @@ function BioInfoTab({
     bio: barber.bio ?? "",
     bioUz: barber.bioUz ?? "",
     bioRu: barber.bioRu ?? "",
+    targetGender: barber.targetGender ?? "ALL",
     instagram: barber.socialLinks?.instagram || "",
     telegram: barber.socialLinks?.telegram || "",
     facebook: barber.socialLinks?.facebook || "",
@@ -240,6 +243,7 @@ function BioInfoTab({
     bio !== initial.bio ||
     bioUz !== initial.bioUz ||
     bioRu !== initial.bioRu ||
+    targetGender !== initial.targetGender ||
     instagram !== initial.instagram ||
     telegram !== initial.telegram ||
     facebook !== initial.facebook;
@@ -251,6 +255,7 @@ function BioInfoTab({
       bio,
       bioUz,
       bioRu,
+      targetGender,
       socialLinks: { instagram, telegram, facebook },
     });
     setSaving(false);
@@ -260,6 +265,7 @@ function BioInfoTab({
       bio,
       bioUz,
       bioRu,
+      targetGender,
       instagram,
       telegram,
       facebook,
@@ -277,6 +283,27 @@ function BioInfoTab({
             placeholder="5, 8+, 10+"
             className="h-11"
           />
+        </div>
+
+        <div className="space-y-1.5">
+          <Label className="text-xs">{t("profile.targetGender")}</Label>
+          <div className="grid grid-cols-3 gap-2">
+            {(["ALL", "MALE", "FEMALE"] as const).map((g) => (
+              <button
+                key={g}
+                type="button"
+                onClick={() => setTargetGender(g)}
+                className={cn(
+                  "rounded-xl border-2 py-2 text-xs font-medium transition-all",
+                  targetGender === g
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border hover:border-primary/50 text-muted-foreground",
+                )}
+              >
+                {g === "ALL" ? `👥 ${t("profile.targetAll")}` : g === "MALE" ? `👨 ${t("auth.genderMale")}` : `👩 ${t("auth.genderFemale")}`}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="space-y-1.5">
