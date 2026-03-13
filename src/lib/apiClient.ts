@@ -584,3 +584,7 @@ export async function generateAiStyle(photo: File): Promise<{ generatedImage: st
   }
   return await res.json();
 }
+
+export async function fetchMyBalance(): Promise<{ id: string; name: string; balance: number }> {
+  return api("/balance/me");
+}

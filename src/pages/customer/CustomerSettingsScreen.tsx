@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -8,20 +9,30 @@ import {
   LogOut,
   ChevronRight,
   MessageCircle,
+  Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuthStore } from "@/store/authStore";
 import { useThemeStore } from "@/store/themeStore";
-import { getAvatarUrl } from "@/lib/apiClient";
+import { getAvatarUrl, fetchMyBalance } from "@/lib/apiClient";
 import { cn } from "@/lib/utils";
+
+const TELEGRAM_BOT_URL = "https://t.me/barberbook_support_bot";
 
 export default function CustomerSettingsScreen() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
   const { theme, toggleTheme } = useThemeStore();
+  const [balance, setBalance] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetchMyBalance()
+      .then((d) => setBalance(d.balance ?? 0))
+      .catch(() => setBalance(0));
+  }, []);
 
   if (!user) return null;
 
@@ -60,6 +71,20 @@ export default function CustomerSettingsScreen() {
               <p className="font-bold text-xl">{user.name}</p>
               <p className="text-sm text-muted-foreground mt-0.5">{user.phone}</p>
             </div>
+            {balance !== null && (
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10">
+                <Wallet className="h-4 w-4 text-primary" />
+                <span className="text-sm font-semibold text-primary">{balance.toLocaleString()} so'm</span>
+                <a
+                  href={TELEGRAM_BOT_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-blue-500 underline"
+                >
+                  To'ldirish
+                </a>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

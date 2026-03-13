@@ -31,8 +31,10 @@ import { useBarberScheduleStore } from "@/store/barberScheduleStore";
 import { useBookingStore } from "@/store/bookingStore";
 import { generateTimeSlots } from "@/lib/dateUtils";
 import { cn } from "@/lib/utils";
-import { getAvatarUrl } from "@/lib/apiClient";
+import { getAvatarUrl, fetchMyBalance } from "@/lib/apiClient";
 import { ManualBookingDialog } from "@/components/ManualBookingDialog";
+import { MIN_BALANCE } from "@/components/BarberLayout";
+import { useBalanceModalStore } from "@/store/balanceModalStore";
 import toast from "react-hot-toast";
 
 export default function BarberScheduleScreen() {
@@ -74,6 +76,8 @@ export default function BarberScheduleScreen() {
   const [lunchTo, setLunchTo] = useState("14:00");
   const [skipLunch, setSkipLunch] = useState(false);
   const [newSlotTime, setNewSlotTime] = useState("");
+  const [barberBalance, setBarberBalance] = useState<number | null>(null);
+  const openBalanceModal = useBalanceModalStore((s) => s.openModal);
 
   // Duration
   const [tempDuration, setTempDuration] = useState(30);
@@ -82,6 +86,7 @@ export default function BarberScheduleScreen() {
     if (user) {
       loadBarber(user.id);
       loadBarberBookings(user.id).catch(() => {});
+      fetchMyBalance().then((d) => setBarberBalance(d.balance)).catch(() => {});
     }
   }, [user, loadBarber, loadBarberBookings]);
 
@@ -147,7 +152,16 @@ export default function BarberScheduleScreen() {
     setShowGenerator(false);
   };
 
+  const checkBalance = () => {
+    if (barberBalance !== null && barberBalance < MIN_BALANCE) {
+      openBalanceModal();
+      return false;
+    }
+    return true;
+  };
+
   const handleRemoveSlot = async (time: string) => {
+    if (!checkBalance()) return;
     const updated = editSlots.filter((s) => s !== time);
     setEditSlots(updated);
     await saveDaySchedule({ barberId: barber.id, date: selectedDate, slots: updated });
@@ -157,6 +171,7 @@ export default function BarberScheduleScreen() {
 
   const handleAddSlot = async () => {
     if (!newSlotTime || editSlots.includes(newSlotTime)) return;
+    if (!checkBalance()) return;
     const updated = [...editSlots, newSlotTime].sort();
     setEditSlots(updated);
     setNewSlotTime("");
@@ -165,6 +180,7 @@ export default function BarberScheduleScreen() {
   };
 
   const handleSaveSchedule = async () => {
+    if (!checkBalance()) return;
     await saveDaySchedule({ barberId: barber.id, date: selectedDate, slots: editSlots });
     setIsEditing(false);
     toast.success(t("barberPanel.scheduleSaved"));

@@ -47,30 +47,28 @@ export function CustomerLayout({ children }: { children: ReactNode }) {
     <div className="flex flex-col h-[100dvh] bg-background">
       {/* Header with notification bell (hidden on barber detail page) */}
       <header className="flex items-center justify-between px-4 py-3 border-b bg-background/95 backdrop-blur safe-area-top shrink-0">
-          <div className="flex items-center gap-2 font-bold text-xl">
-            <Scissors className="h-6 w-6 text-primary" />
-            <span className="bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
-              BarberBook
+        <div className="flex items-center gap-2 font-bold text-xl">
+          <Scissors className="h-6 w-6 text-primary" />
+          <span className="bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
+            BarberBook
+          </span>
+        </div>
+        <button
+          onClick={() => navigate("/customer/notifications")}
+          className="relative flex items-center justify-center h-9 w-9"
+        >
+          <Bell className="h-5 w-5 text-foreground" />
+          {unread > 0 && (
+            <span className="absolute top-0 right-0 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-white ring-2 ring-background px-1">
+              {unread > 9 ? "9+" : unread}
             </span>
-          </div>
-          <button
-            onClick={() => navigate("/customer/notifications")}
-            className="relative flex items-center justify-center h-9 w-9"
-          >
-            <Bell className="h-5 w-5 text-foreground" />
-            {unread > 0 && (
-              <span className="absolute top-0 right-0 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-white ring-2 ring-background px-1">
-                {unread > 9 ? "9+" : unread}
-              </span>
-            )}
-          </button>
-        </header>
+          )}
+        </button>
+      </header>
 
       {/* Scrollable content */}
       <main className={`flex-1 overflow-y-auto ${isMapPage ? "" : "pb-20"}`}>
-        <Suspense fallback={<PageLoader />}>
-          {children}
-        </Suspense>
+        <Suspense fallback={<PageLoader />}>{children}</Suspense>
       </main>
 
       {/* Fixed bottom tab bar */}
@@ -79,10 +77,9 @@ export function CustomerLayout({ children }: { children: ReactNode }) {
           {tabs.map((tab) => {
             const isActive =
               location.pathname === tab.path ||
-              (tab.key === "barbers" && (
-                location.pathname.startsWith("/customer/barber/") ||
-                location.pathname.startsWith("/customer/booking/")
-              ));
+              (tab.key === "barbers" &&
+                (location.pathname.startsWith("/customer/barber/") ||
+                  location.pathname.startsWith("/customer/booking/")));
             const Icon = tab.icon;
             return (
               <button
@@ -98,7 +95,9 @@ export function CustomerLayout({ children }: { children: ReactNode }) {
                   className={`${isActive ? "h-6 w-6" : "h-5 w-5"} transition-all`}
                   strokeWidth={isActive ? 2.5 : 2}
                 />
-                <span className={`text-[10px] font-medium ${isActive ? "font-semibold" : ""}`}>
+                <span
+                  className={`text-[10px] font-medium ${isActive ? "font-semibold" : ""}`}
+                >
                   {t(`customerApp.${tab.key}`)}
                 </span>
               </button>

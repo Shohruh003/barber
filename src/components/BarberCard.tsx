@@ -49,7 +49,7 @@ export function BarberCard({ barber, onToggleAvailability }: BarberCardProps) {
 
         <div className="p-4 -mt-10 relative">
           {/* Avatar */}
-          <Avatar className="h-16 w-16 border-4 border-background shadow-md">
+          <Avatar className="h-16 w-16 border-4 border-background shadow-md overflow-hidden">
             <AvatarImage src={barber.avatar} alt={barber.name} />
             <AvatarFallback className="text-lg">{barber.name[0]}</AvatarFallback>
           </Avatar>

@@ -93,13 +93,13 @@ export default function CustomerMapScreen() {
         {},
         {
           iconLayout: "default#imageWithContent",
-          iconImageHref: barber.avatar || "",
+          iconImageHref: "",
           iconImageSize: [44, 44],
           iconImageOffset: [-22, -22],
           iconContentOffset: [0, 0],
           iconContentLayout: ymaps.templateLayoutFactory.createClass(
             barber.avatar
-              ? '<div class="barber-marker"><img src="' + barber.avatar + '" /></div>'
+              ? '<div class="barber-marker"><img src="' + barber.avatar + '" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:50%;" /></div>'
               : '<div class="barber-marker"><div class="barber-marker-fallback">' + barber.name[0] + '</div></div>',
           ),
           hasBalloon: false,

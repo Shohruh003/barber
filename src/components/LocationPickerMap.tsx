@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { MapPin, Navigation, Check, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
