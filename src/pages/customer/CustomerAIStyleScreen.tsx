@@ -436,14 +436,21 @@ export default function CustomerAIStyleScreen() {
               onClick={(e) => e.stopPropagation()}
             />
           </div>
-          {fullscreenImage === generatedImage && (
-            <div className="p-4 pb-8" onClick={(e) => e.stopPropagation()}>
-              <Button className="w-full h-12 text-base" onClick={handleDownload}>
+              <div className="p-4 pb-8 flex gap-2" onClick={(e) => e.stopPropagation()}>
+            {fullscreenImage === generatedImage && (
+              <Button className="flex-1 h-12 text-base" onClick={handleDownload}>
                 <Download className="h-5 w-5 mr-2" />
                 {t("aiStyle.download")}
               </Button>
-            </div>
-          )}
+            )}
+            <button
+              className="flex-1 h-12 text-base rounded-md border border-white/30 text-white bg-white/10 hover:bg-white/20 transition-colors flex items-center justify-center gap-2"
+              onClick={() => setFullscreenImage(null)}
+            >
+              <X className="h-5 w-5" />
+              {t("common.close")}
+            </button>
+          </div>
         </div>
       )}
 

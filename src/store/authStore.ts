@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { User } from "@/types";
-import { loginAPI, registerAPI, fetchMeAPI, updateProfile, uploadAvatar, registerDeviceAPI } from "@/lib/apiClient";
+import { loginAPI, registerAPI, fetchMeAPI, updateProfile, uploadAvatar, registerDeviceAPI, removeDeviceAPI } from "@/lib/apiClient";
 
 interface AuthState {
   user: User | null;
@@ -76,6 +76,11 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: () => {
+        // Remove FCM token from server before clearing state
+        try {
+          const fcmToken = (window as any).Android?.getFcmToken?.();
+          if (fcmToken) removeDeviceAPI(fcmToken).catch(() => {});
+        } catch {}
         set({ user: null, token: null });
         localStorage.clear();
         sessionStorage.clear();
