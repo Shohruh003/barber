@@ -209,20 +209,10 @@ export default function CustomerBarbersScreen() {
                           className="w-full h-full object-cover opacity-60"
                         />
                       )}
-                      <div className="absolute top-2 right-2 flex flex-col gap-1 items-end">
+                      <div className="absolute top-2 right-2">
                         <Badge variant={barber.isAvailable ? "success" : "secondary"} className="text-[10px]">
                           {barber.isAvailable ? t("barbers.available") : t("barbers.unavailable")}
                         </Badge>
-                        {barber.targetGender === "MALE" && (
-                          <Badge variant="secondary" className="text-[9px] bg-blue-500/90 text-white border-0">
-                            👨 {t("barberGender.maleOnly")}
-                          </Badge>
-                        )}
-                        {barber.targetGender === "FEMALE" && (
-                          <Badge variant="secondary" className="text-[9px] bg-pink-500/90 text-white border-0">
-                            👩 {t("barberGender.femaleOnly")}
-                          </Badge>
-                        )}
                       </div>
                       {/* Heart */}
                       <button
@@ -247,14 +237,26 @@ export default function CustomerBarbersScreen() {
                       "relative flex-1 flex flex-col",
                       isSingle ? "p-3 -mt-8" : "p-2.5 -mt-6"
                     )}>
-                      {/* Avatar */}
-                      <Avatar className={cn(
-                        "border-3 border-background shadow-md",
-                        isSingle ? "h-14 w-14" : "h-11 w-11"
-                      )}>
-                        <AvatarImage src={barber.avatar} alt={barber.name} />
-                        <AvatarFallback className={isSingle ? "text-lg" : "text-sm"}>{barber.name[0]}</AvatarFallback>
-                      </Avatar>
+                      {/* Avatar + gender badge */}
+                      <div className="flex items-end justify-between">
+                        <Avatar className={cn(
+                          "border-3 border-background shadow-md",
+                          isSingle ? "h-14 w-14" : "h-11 w-11"
+                        )}>
+                          <AvatarImage src={barber.avatar} alt={barber.name} />
+                          <AvatarFallback className={isSingle ? "text-lg" : "text-sm"}>{barber.name[0]}</AvatarFallback>
+                        </Avatar>
+                        {barber.targetGender === "MALE" && (
+                          <Badge variant="secondary" className="text-[9px] bg-blue-500/90 text-white border-0 mb-0.5">
+                            👨 {t("barberGender.maleOnly")}
+                          </Badge>
+                        )}
+                        {barber.targetGender === "FEMALE" && (
+                          <Badge variant="secondary" className="text-[9px] bg-pink-500/90 text-white border-0 mb-0.5">
+                            👩 {t("barberGender.femaleOnly")}
+                          </Badge>
+                        )}
+                      </div>
 
                       <div className={cn("space-y-1 flex-1 flex flex-col", isSingle ? "mt-2" : "mt-1.5")}>
                         {isSingle ? (
