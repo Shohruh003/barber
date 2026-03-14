@@ -83,7 +83,10 @@
     "bookingConfirmedMsg": "Your appointment has been booked successfully",
     "noSlots": "No available slots for this date",
     "duration": "min",
-    "closed": "Closed"
+    "closed": "Closed",
+    "genderRestrictionMale": "This barber serves men only",
+    "genderRestrictionFemale": "This barber serves women only",
+    "genderRestriction": "This barber cannot serve you"
   },
   "profile": {
     "title": "My Profile",
@@ -196,7 +199,8 @@
     "backToLogin": "Back to login",
     "gender": "Your gender",
     "genderMale": "Male",
-    "genderFemale": "Female"
+    "genderFemale": "Female",
+    "genderSelect": "Select..."
   },
   "admin": {
     "title": "Admin Dashboard",
@@ -424,6 +428,27 @@
     "noHistory": "No results yet",
     "error": "Could not generate style. Please try again.",
     "bannerTitle": "AI Hairstyle",
-    "bannerSubtitle": "Find your perfect hairstyle with AI"
+    "bannerSubtitle": "Find your perfect hairstyle with AI",
+    "styleQuestion": "What would you like to change?",
+    "reference": "Sample",
+    "selectAtLeastOne": "Select at least one",
+    "atLeastOneRequired": "Please select at least one service",
+    "topUp": "Top up balance (Telegram)",
+    "later": "Later",
+    "limitReached": "Daily limit reached",
+    "balanceLow": "Insufficient balance",
+    "currentBalance": "Current balance",
+    "freeDailyHint": "{{free}} free generations per day. From the {{next}}th onwards {{price}} sum each.",
+    "dailyBadge": "{{free}} free daily · Next one {{price}} sum",
+    "styleHair": "Hairstyle",
+    "styleBeard": "Beard",
+    "styleHairColor": "Hair color",
+    "styleEyebrows": "Eyebrows",
+    "styleLips": "Lips",
+    "styleEyelashes": "Eyelashes"
+  },
+  "barberGender": {
+    "maleOnly": "Men only",
+    "femaleOnly": "Women only"
   }
 }

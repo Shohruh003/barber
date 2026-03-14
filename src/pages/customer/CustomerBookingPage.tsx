@@ -143,8 +143,9 @@ export default function CustomerBookingPage() {
       await confirmBooking(user.id, barber, selectedServices, selectedDate, selectedTime, notes);
       setIsConfirmed(true);
       toast.success(t("booking.bookingConfirmed"));
-    } catch {
-      toast.error(t("common.error"));
+    } catch (err) {
+      const apiErr = err as Error & { status?: number };
+      toast.error(apiErr.status === 403 ? t("booking.genderRestriction") : t("common.error"));
     } finally {
       setIsSubmitting(false);
     }

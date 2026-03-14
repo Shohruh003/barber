@@ -32,6 +32,7 @@ export const profileSchema = z.object({
   phone: phoneField,
   oldPassword: z.string().optional(),
   newPassword: z.string().optional(),
+  confirmPassword: z.string().optional(),
 }).refine((data) => {
   if (data.oldPassword && !data.newPassword) return false;
   if (!data.oldPassword && data.newPassword) return false;
@@ -40,6 +41,12 @@ export const profileSchema = z.object({
 }, {
   message: "Parolni o'zgartirish uchun eski va yangi parolni kiriting (kamida 6 belgi)",
   path: ["newPassword"],
+}).refine((data) => {
+  if (data.newPassword && data.newPassword !== data.confirmPassword) return false;
+  return true;
+}, {
+  message: "Parollar mos kelmadi",
+  path: ["confirmPassword"],
 });
 
 export const forgotPasswordSchema = z.object({

@@ -83,7 +83,10 @@
     "bookingConfirmedMsg": "Sizning uchrashuv muvaffaqiyatli belgilandi",
     "noSlots": "Bu sana uchun bo'sh vaqt yo'q",
     "duration": "daq",
-    "closed": "Yopiq"
+    "closed": "Yopiq",
+    "genderRestrictionMale": "Bu sartarosh faqat erkaklar uchun xizmat ko'rsatadi",
+    "genderRestrictionFemale": "Bu sartarosh faqat ayollar uchun xizmat ko'rsatadi",
+    "genderRestriction": "Bu sartarosh sizga xizmat ko'rsata olmaydi"
   },
   "profile": {
     "title": "Mening profilim",
@@ -196,7 +199,8 @@
     "backToLogin": "Kirishga qaytish",
     "gender": "Jinsingiz (ixtiyoriy)",
     "genderMale": "Erkak",
-    "genderFemale": "Ayol"
+    "genderFemale": "Ayol",
+    "genderSelect": "Tanlang..."
   },
   "admin": {
     "title": "Admin paneli",
@@ -424,6 +428,27 @@
     "noHistory": "Hali natijalar yo'q",
     "error": "Stil yaratib bo'lmadi. Qayta urinib ko'ring.",
     "bannerTitle": "AI soch turmagi",
-    "bannerSubtitle": "Sun'iy intellekt bilan ideal turmagingizni toping"
+    "bannerSubtitle": "Sun'iy intellekt bilan ideal turmagingizni toping",
+    "styleQuestion": "Qanday o'zgartirishni xohlaysiz?",
+    "reference": "Namuna",
+    "selectAtLeastOne": "Kamida bitta tanlang",
+    "atLeastOneRequired": "Kamida bitta xizmat tanlang",
+    "topUp": "Hisob to'ldirish (Telegram)",
+    "later": "Keyinroq",
+    "limitReached": "Kunlik limit tugadi",
+    "balanceLow": "Balans yetarli emas",
+    "currentBalance": "Joriy balans",
+    "freeDailyHint": "Kuniga {{free}} ta generatsiya bepul. {{next}}-dan boshlab har biri uchun {{price}} so'm.",
+    "dailyBadge": "Kunlik {{free}} ta bepul · Keyingisi {{price}} so'm",
+    "styleHair": "Soch uslubi",
+    "styleBeard": "Soqol",
+    "styleHairColor": "Soch bo'yash",
+    "styleEyebrows": "Qosh",
+    "styleLips": "Lab",
+    "styleEyelashes": "Kiprik"
+  },
+  "barberGender": {
+    "maleOnly": "Faqat erkaklar",
+    "femaleOnly": "Faqat ayollar"
   }
 }

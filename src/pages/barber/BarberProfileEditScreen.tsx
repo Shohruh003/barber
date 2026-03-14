@@ -276,16 +276,6 @@ function BioInfoTab({
     <Card>
       <CardContent className="pt-4 space-y-4">
         <div className="space-y-1.5">
-          <Label className="text-xs">{t("profile.experience")}</Label>
-          <Input
-            value={experience}
-            onChange={(e) => setExperience(e.target.value)}
-            placeholder="5, 8+, 10+"
-            className="h-11"
-          />
-        </div>
-
-        <div className="space-y-1.5">
           <Label className="text-xs">{t("profile.targetGender")}</Label>
           <div className="grid grid-cols-3 gap-2">
             {(["ALL", "MALE", "FEMALE"] as const).map((g) => (
@@ -304,6 +294,16 @@ function BioInfoTab({
               </button>
             ))}
           </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label className="text-xs">{t("profile.experience")}</Label>
+          <Input
+            value={experience}
+            onChange={(e) => setExperience(e.target.value)}
+            placeholder="5, 8+, 10+"
+            className="h-11"
+          />
         </div>
 
         <div className="space-y-1.5">

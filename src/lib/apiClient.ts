@@ -24,8 +24,10 @@ async function api<T>(path: string, options: RequestInit = {}, skipAuth = false)
 
   const res = await fetch(`${API_URL}${path}`, { ...options, headers });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || `API Error ${res.status}`);
+    const body = await res.json().catch(() => ({}));
+    const error = new Error(body.message || `API Error ${res.status}`) as Error & { status: number };
+    error.status = res.status;
+    throw error;
   }
   const text = await res.text();
   return text ? (JSON.parse(text) as T) : (null as unknown as T);
@@ -566,10 +568,18 @@ export async function deleteUserAPI(id: string): Promise<boolean> {
 }
 
 // ---------- AI STYLE ----------
-export async function generateAiStyle(photo: File): Promise<{ generatedImage: string }> {
+export async function generateAiStyle(
+  photo: File,
+  styles: string[] = [],
+  referenceImages: Record<string, File> = {},
+): Promise<{ generatedImage: string }> {
   const token = getToken();
   const formData = new FormData();
   formData.append("photo", photo);
+  styles.forEach((s) => formData.append("styles", s));
+  Object.entries(referenceImages).forEach(([key, file]) => {
+    formData.append(`ref_${key}`, file);
+  });
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 120000);

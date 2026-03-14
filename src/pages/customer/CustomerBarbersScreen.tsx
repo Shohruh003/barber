@@ -209,10 +209,20 @@ export default function CustomerBarbersScreen() {
                           className="w-full h-full object-cover opacity-60"
                         />
                       )}
-                      <div className="absolute top-2 right-2">
+                      <div className="absolute top-2 right-2 flex flex-col gap-1 items-end">
                         <Badge variant={barber.isAvailable ? "success" : "secondary"} className="text-[10px]">
                           {barber.isAvailable ? t("barbers.available") : t("barbers.unavailable")}
                         </Badge>
+                        {barber.targetGender === "MALE" && (
+                          <Badge variant="secondary" className="text-[9px] bg-blue-500/90 text-white border-0">
+                            👨 {t("barberGender.maleOnly")}
+                          </Badge>
+                        )}
+                        {barber.targetGender === "FEMALE" && (
+                          <Badge variant="secondary" className="text-[9px] bg-pink-500/90 text-white border-0">
+                            👩 {t("barberGender.femaleOnly")}
+                          </Badge>
+                        )}
                       </div>
                       {/* Heart */}
                       <button

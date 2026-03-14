@@ -18,25 +18,15 @@ import { useAuthStore } from "@/store/authStore";
 import { useThemeStore } from "@/store/themeStore";
 import { getAvatarUrl, fetchMyBalance } from "@/lib/apiClient";
 import { cn } from "@/lib/utils";
-import toast from "react-hot-toast";
 
 const TELEGRAM_BOT_URL = "https://t.me/barberbook_support_bot";
 
 export default function CustomerSettingsScreen() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { user, logout, updateUser } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const { theme, toggleTheme } = useThemeStore();
   const [balance, setBalance] = useState<number | null>(null);
-
-  const handleGenderChange = async (g: "MALE" | "FEMALE") => {
-    if (user?.gender === g) return;
-    try {
-      await updateUser({ gender: g });
-    } catch {
-      toast.error(t("common.error"));
-    }
-  };
 
   useEffect(() => {
     fetchMyBalance()
@@ -95,30 +85,6 @@ export default function CustomerSettingsScreen() {
                 </a>
               </div>
             )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Gender */}
-      <Card>
-        <CardContent className="pt-4 pb-4 space-y-3">
-          <p className="font-semibold text-sm">{t("auth.gender")}</p>
-          <div className="grid grid-cols-2 gap-2">
-            {(["MALE", "FEMALE"] as const).map((g) => (
-              <button
-                key={g}
-                onClick={() => handleGenderChange(g)}
-                className={cn(
-                  "flex items-center justify-center gap-2 rounded-xl border-2 py-2.5 text-sm font-medium transition-all",
-                  user?.gender === g
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border hover:border-primary/50 text-muted-foreground",
-                )}
-              >
-                <span>{g === "MALE" ? "👨" : "👩"}</span>
-                {g === "MALE" ? t("auth.genderMale") : t("auth.genderFemale")}
-              </button>
-            ))}
           </div>
         </CardContent>
       </Card>

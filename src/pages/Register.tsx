@@ -221,33 +221,6 @@ export default function Register() {
               </div>
             </div>
 
-            {/* Gender selector — only for customers */}
-            {selectedRole === "user" && (
-              <div className="space-y-2">
-                <Label>{t("auth.gender")}</Label>
-                <div className="grid grid-cols-2 gap-3">
-                  {(["MALE", "FEMALE"] as const).map((g) => (
-                    <button
-                      key={g}
-                      type="button"
-                      onClick={() => setGender(g)}
-                      className={cn(
-                        "flex flex-col items-center gap-1.5 rounded-lg border-2 p-3 transition-all",
-                        gender === g
-                          ? "border-primary bg-primary/5"
-                          : "border-muted hover:border-muted-foreground/30",
-                      )}
-                    >
-                      <span className="text-2xl">{g === "MALE" ? "👨" : "👩"}</span>
-                      <span className={cn("text-sm font-medium", gender === g ? "text-primary" : "text-muted-foreground")}>
-                        {g === "MALE" ? t("auth.genderMale") : t("auth.genderFemale")}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
             <div className="space-y-2">
               <Label htmlFor="name">{t("auth.name")}</Label>
               <Input
@@ -259,6 +232,28 @@ export default function Register() {
               {errors.name && (
                 <p className="text-sm text-destructive">{errors.name.message}</p>
               )}
+            </div>
+
+            <div className="space-y-2">
+              <Label>{t("auth.gender")}</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {(["MALE", "FEMALE"] as const).map((g) => (
+                  <button
+                    key={g}
+                    type="button"
+                    onClick={() => setGender(gender === g ? null : g)}
+                    className={cn(
+                      "flex items-center justify-center gap-2 h-10 rounded-md border-2 text-sm font-medium transition-all",
+                      gender === g
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-input hover:border-primary/50 text-muted-foreground",
+                    )}
+                  >
+                    <span>{g === "MALE" ? "👨" : "👩"}</span>
+                    {g === "MALE" ? t("auth.genderMale") : t("auth.genderFemale")}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="space-y-2">

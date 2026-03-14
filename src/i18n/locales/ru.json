@@ -83,7 +83,10 @@
     "bookingConfirmedMsg": "Ваша встреча успешно забронирована",
     "noSlots": "Нет свободных слотов на эту дату",
     "duration": "мин",
-    "closed": "Закрыто"
+    "closed": "Закрыто",
+    "genderRestrictionMale": "Этот барбер работает только с мужчинами",
+    "genderRestrictionFemale": "Этот барбер работает только с женщинами",
+    "genderRestriction": "Этот барбер не может вас обслужить"
   },
   "profile": {
     "title": "Мой профиль",
@@ -196,7 +199,8 @@
     "backToLogin": "Вернуться ко входу",
     "gender": "Ваш пол",
     "genderMale": "Мужчина",
-    "genderFemale": "Женщина"
+    "genderFemale": "Женщина",
+    "genderSelect": "Выберите..."
   },
   "admin": {
     "title": "Панель администратора",
@@ -424,6 +428,27 @@
     "noHistory": "Пока нет результатов",
     "error": "Не удалось создать стиль. Попробуйте снова.",
     "bannerTitle": "AI причёска",
-    "bannerSubtitle": "Подберите идеальную причёску с помощью ИИ"
+    "bannerSubtitle": "Подберите идеальную причёску с помощью ИИ",
+    "styleQuestion": "Что хотите изменить?",
+    "reference": "Пример",
+    "selectAtLeastOne": "Выберите хотя бы одно",
+    "atLeastOneRequired": "Выберите хотя бы одну услугу",
+    "topUp": "Пополнить счёт (Telegram)",
+    "later": "Позже",
+    "limitReached": "Дневной лимит исчерпан",
+    "balanceLow": "Недостаточно баланса",
+    "currentBalance": "Текущий баланс",
+    "freeDailyHint": "В день {{free}} генерации бесплатно. С {{next}}-й по {{price}} сум каждая.",
+    "dailyBadge": "{{free}} бесплатно в день · Следующий {{price}} сум",
+    "styleHair": "Причёска",
+    "styleBeard": "Борода",
+    "styleHairColor": "Окрашивание",
+    "styleEyebrows": "Брови",
+    "styleLips": "Губы",
+    "styleEyelashes": "Ресницы"
+  },
+  "barberGender": {
+    "maleOnly": "Только мужчины",
+    "femaleOnly": "Только женщины"
   }
 }

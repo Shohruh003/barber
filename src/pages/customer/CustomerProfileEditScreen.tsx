@@ -16,10 +16,10 @@ import { Label } from "@/components/ui/label";
 import { phoneToRaw } from "@/components/PhoneInput";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
 import { useAuthStore } from "@/store/authStore";
 import { profileSchema, type ProfileFormData } from "@/lib/validation";
 import { getAvatarUrl } from "@/lib/apiClient";
+import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 
 export default function CustomerProfileEditScreen() {
@@ -30,8 +30,10 @@ export default function CustomerProfileEditScreen() {
   const [avatarUrl, setAvatarUrl] = useState("");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState("");
+  const [gender, setGender] = useState<"MALE" | "FEMALE" | null>(user?.gender ?? null);
   const [showOldPass, setShowOldPass] = useState(false);
   const [showNewPass, setShowNewPass] = useState(false);
+  const [showConfirmPass, setShowConfirmPass] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const {
@@ -45,6 +47,7 @@ export default function CustomerProfileEditScreen() {
       phone: user?.phone,
       oldPassword: "",
       newPassword: "",
+      confirmPassword: "",
     },
   });
 
@@ -65,6 +68,7 @@ export default function CustomerProfileEditScreen() {
       const payload: Record<string, string | undefined> = {
         name: data.name,
         phone: phoneToRaw(data.phone),
+        ...(gender ? { gender } : {}),
       };
       if (data.oldPassword && data.newPassword) {
         payload.oldPassword = data.oldPassword;
@@ -92,7 +96,7 @@ export default function CustomerProfileEditScreen() {
 
       <form onSubmit={handleSubmit(onSave)} className="px-4 py-4 space-y-4">
         {/* Avatar */}
-        <div className="flex justify-center">
+        <div className="flex flex-col items-center gap-2">
           <div className="relative">
             <Avatar className="h-24 w-24">
               <AvatarImage src={avatarPreview || getAvatarUrl(avatarUrl) || getAvatarUrl(user.avatar)} />
@@ -110,6 +114,7 @@ export default function CustomerProfileEditScreen() {
               }} />
             </label>
           </div>
+          <p className="font-semibold text-base">{user.name}</p>
         </div>
 
         {/* Name */}
@@ -119,6 +124,31 @@ export default function CustomerProfileEditScreen() {
               <Label className="text-xs">{t("profile.name")}</Label>
               <Input {...register("name")} className="h-11" />
               {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Gender */}
+        <Card>
+          <CardContent className="pt-4 pb-4 space-y-3">
+            <p className="font-semibold text-sm">{t("auth.gender")}</p>
+            <div className="grid grid-cols-2 gap-2">
+              {(["MALE", "FEMALE"] as const).map((g) => (
+                <button
+                  key={g}
+                  type="button"
+                  onClick={() => setGender(gender === g ? null : g)}
+                  className={cn(
+                    "flex items-center justify-center gap-2 rounded-xl border-2 py-2.5 text-sm font-medium transition-all",
+                    gender === g
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border hover:border-primary/50 text-muted-foreground",
+                  )}
+                >
+                  <span>{g === "MALE" ? "👨" : "👩"}</span>
+                  {g === "MALE" ? t("auth.genderMale") : t("auth.genderFemale")}
+                </button>
+              ))}
             </div>
           </CardContent>
         </Card>
@@ -146,6 +176,16 @@ export default function CustomerProfileEditScreen() {
               </div>
               {errors.newPassword && <p className="text-xs text-destructive">{errors.newPassword.message}</p>}
             </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">{t("auth.confirmPassword")}</Label>
+              <div className="relative">
+                <Input type={showConfirmPass ? "text" : "password"} {...register("confirmPassword")} placeholder="••••••" className="h-11" />
+                <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground" onClick={() => setShowConfirmPass(!showConfirmPass)}>
+                  {showConfirmPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>}
+            </div>
           </CardContent>
         </Card>
 
@@ -153,7 +193,7 @@ export default function CustomerProfileEditScreen() {
         <Button
           type="submit"
           className="w-full h-12"
-          disabled={saving || (!isDirty && !avatarFile)}
+          disabled={saving || (!isDirty && !avatarFile && gender === (user?.gender ?? null))}
         >
           <Check className="h-4 w-4 mr-2" />
           {saving ? t("common.loading") : t("common.save")}
